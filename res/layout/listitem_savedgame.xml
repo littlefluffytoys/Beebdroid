@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:paddingLeft="8dp"
+	android:paddingRight="8dp"
+	android:paddingTop="4dp"
+	android:paddingBottom="4dp"
+	>
+<ImageView
+	android:id="@+id/image"
+	android:layout_width="80dp"
+	android:layout_height="64dp"
+	android:layout_marginRight="8dp"
+	android:scaleType="fitXY"
+	/>
+<TextView
+	android:id="@+id/title"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_toRightOf="@id/image"
+	android:textColor="@android:color/black"
+	android:textSize="18sp"
+	android:textStyle="bold"
+	/>
+<TextView
+	android:id="@+id/age"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_alignBaseline="@id/title"
+	android:layout_alignParentRight="true"
+	android:textColor="#ffa0a0a0"
+	android:textSize="12sp"
+	android:textStyle="italic"
+	/>
+
+<LinearLayout
+	android:id="@+id/buttons"
+	android:layout_width="fill_parent"
+	android:layout_height="40dp"
+	android:layout_marginLeft="80dp"
+	android:layout_alignParentBottom="true"
+	android:paddingLeft="6dp"
+	android:paddingTop="6dp"
+	android:visibility="gone"
+	>
+	<Button
+		android:id="@+id/btnOverwrite"
+		android:layout_width="0dp"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:layout_marginRight="6dp"
+		android:text="Overwrite"
+ 		android:focusable="false"
+    	android:focusableInTouchMode="false"
+    	android:background="@drawable/form_standalone"
+    	android:onClick="onOverwriteClicked"
+  		/>
+	<Button
+		android:id="@+id/btnRestore"
+		android:layout_width="0dp"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:text="Restore"
+		android:focusable="false"
+    	android:focusableInTouchMode="false"
+    	android:background="@drawable/form_standalone"
+    	android:onClick="onRestoreClicked"
+ 		/>
+</LinearLayout>
+
+</RelativeLayout>

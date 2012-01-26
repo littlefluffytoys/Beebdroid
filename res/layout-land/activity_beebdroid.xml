@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:lft="http://schemas.android.com/apk/res/com.littlefluffytoys.beebdroid"
+	
+	android:id="@+id/root"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	>
+	
+	
+<view class="com.littlefluffytoys.beebdroid.Beebdroid$BeebView"
+	android:id="@+id/beeb"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_marginLeft="60dp"
+	android:layout_marginRight="60dp"
+	/>
+
+
+<FrameLayout 	
+	android:layout_width="fill_parent"
+	android:layout_height="@dimen/keyboardAreaHeight"
+	android:layout_alignParentBottom="true"
+>	
+<ViewFlipper 
+	android:id="@+id/flipper"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+>	
+
+<view class="com.littlefluffytoys.beebdroid.Keyboard"
+	android:id="@+id/keyboard"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	/>
+
+<view class="com.littlefluffytoys.beebdroid.ControllerView"
+	android:id="@+id/controller"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	/>
+
+</ViewFlipper>
+</FrameLayout>
+
+
+<ImageView 
+	android:id="@+id/btnSave"
+	android:layout_width="48dp"
+	android:layout_height="48dp"
+	android:background="@drawable/tab"
+	android:src="@drawable/save"
+	android:onClick="onSaveClicked"
+	android:layout_alignParentRight="true"
+/>
+
+
+<ImageView 
+	android:id="@+id/btnInput"
+	android:layout_width="48dp"
+	android:layout_height="48dp"
+	android:background="@drawable/tab"
+/>
+<TextView 
+	android:id="@+id/fps"
+	android:layout_width="fill_parent"
+	android:layout_height="48dp"
+	android:layout_alignParentBottom="true"
+	android:gravity="center"
+	android:textColor="#ffffffff"
+	android:visibility="visible"
+/>
+
+</RelativeLayout>

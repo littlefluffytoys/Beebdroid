@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:padding="10dp"
+	android:background="#FFFFFF">
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center">
+
+		<ImageView android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center_vertical|center_horizontal"
+		    android:src="@drawable/icon"
+		    android:layout_marginRight="20dp" />
+		    
+	    <LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:gravity="center_vertical">
+
+			<TextView 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:textSize="20dp"
+				android:textStyle="bold"
+				android:text="@string/app_name"
+				android:textColor="#000000"
+				android:gravity="center"/>
+	
+			<TextView 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:textSize="15dp"
+				android:textStyle="bold"
+				android:text="@string/app_name2"
+				android:textColor="#000000"
+				android:gravity="center"/>
+	
+			<TextView 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textSize="13dp"
+				android:text="@string/about_lft"
+				android:textColor="#000000"
+				android:gravity="center"/>
+
+			<TextView
+				android:text="@string/about_lft3"
+				android:autoLink="web"
+				android:textSize="13dp"
+				android:gravity="center"
+				android:layout_height="wrap_content"
+				android:textColor="#000000"
+				android:layout_width="fill_parent"/>
+
+		</LinearLayout>
+
+	</LinearLayout>
+
+	<ScrollView
+		android:layout_width="wrap_content" 
+ android:layout_height="fill_parent"
+ android:layout_weight="1" 
+		android:layout_marginTop="10dp">
+
+	    <LinearLayout
+			android:layout_width="wrap_content"
+ android:layout_height="fill_parent"
+			android:orientation="vertical"
+			android:gravity="center_vertical">
+
+	        <TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textSize="11dp"
+				android:text="@string/about_text0"
+				android:textColor="#000000"
+				android:gravity="center"
+				android:layout_marginTop="5dp"/>
+
+			<TextView 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textSize="8dp"
+				android:text="@string/about_copyright"
+				android:textColor="#000000"
+				android:gravity="center"
+				android:layout_marginTop="5dp"/>
+	
+			<TextView 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textSize="8dp"
+				android:text="@string/about_games"
+				android:textColor="#000000"
+				android:gravity="center"
+				android:layout_marginTop="3dp"/>
+
+		</LinearLayout>
+			
+	</ScrollView>	
+	
+	<CheckBox
+			android:id="@+id/showNextTime"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/about_show_next_time"
+			android:textColor="#ff000000"
+			android:checked="true"
+			android:visibility="invisible"
+			android:gravity="center_vertical"/>
+
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:orientation="horizontal"
+		android:gravity="center">
+
+		<Button android:id="@+id/button_ok"
+			android:layout_width="120dp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:text="@string/ok_button"/>
+
+	</LinearLayout>
+	
+</LinearLayout>

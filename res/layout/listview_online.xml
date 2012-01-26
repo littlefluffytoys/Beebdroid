@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	>
+<ListView 
+	android:id="@+id/list"
+	android:layout_width="fill_parent"
+	android:layout_height="0dp"
+	android:layout_weight="1"
+	android:cacheColorHint="#00000000"
+	android:background="@android:color/white"
+	/>
+
+<TextView 
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_alignParentBottom="true"
+	android:padding="4dp"
+	android:gravity="center"
+	android:background="#ffffffc0"
+	android:textColor="#ff000000"
+	android:text="These disk files are very kindly provided by\nhttp://www.stairwaytohell.com/"
+	android:autoLink="web"
+    />
+</LinearLayout>

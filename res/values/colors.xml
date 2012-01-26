@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+ 
+ <resources>
+     
+<color name="focused1">#FFff8c00</color>
+<color name="focused2">#FFffA500</color>
+<color name="pressed1">#FFFFA814</color>
+<color name="pressed2">#FFFFAB26</color>
+<color name="formBackground">#FFFFFFFF</color>
+<color name="formFieldBorder">#FFA0A0A0</color>
+<color name="formError">#FFFF4040</color>
+<color name="formHint">#FFC0C0C0</color>
+<color name="formLabel">#FF408040</color>
+<color name="formButtonText">#FFFFFFFF</color>
+
+<style name="DialogNoTitle" parent="android:style/Theme.Dialog">
+   <item name="android:windowNoTitle">true</item>
+</style>
+
+        
+ </resources>
+

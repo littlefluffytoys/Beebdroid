@@ -366,7 +366,8 @@ public class Beebdroid extends Activity implements AdListener
     private void processDiskViaIntent() {
         // Diskette passed from another process
         Intent intent = getIntent();
-        if (intent.getAction().equals("com.littlefluffytoys.beebdroid.OPEN_DISK")) {
+        if (intent.getAction() != null &&
+            intent.getAction().equals("com.littlefluffytoys.beebdroid.OPEN_DISK")) {
         	bbcBreak(0);
     		byte[] diskBytes = intent.getExtras().getByteArray("disk_image");
     		diskImage = ByteBuffer.allocateDirect(diskBytes.length);

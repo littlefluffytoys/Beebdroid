@@ -40,7 +40,4 @@ LOCAL_SRC_FILES := \
     
 LOCAL_LDLIBS += -lm -llog -ljnigraphics -lz -lGLESv1_CM
 
- 
-LOCAL_CFLAGS += -O3
- 
 include $(BUILD_SHARED_LIBRARY)

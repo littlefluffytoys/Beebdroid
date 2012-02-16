@@ -75,7 +75,7 @@ public class Keyboard extends TouchpadsView {
         add("P", null,  1f, BeebKeys.BBCKEY_P);
         add("@", null,  1f, BeebKeys.BBCKEY_AT);
         add("[", "{",  1f, BeebKeys.BBCKEY_BRACKET_LEFT_SQ);
-        add("_", "£",  1f, BeebKeys.BBCKEY_UNDERSCORE);
+        add("_", "\u00a3",  1f, BeebKeys.BBCKEY_UNDERSCORE);
         addRow();
         add("A", null, 1f, BeebKeys.BBCKEY_A);
         add("S", null,  1f, BeebKeys.BBCKEY_S);

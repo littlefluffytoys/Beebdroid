@@ -89,8 +89,8 @@ public class Keyboard extends TouchpadsView {
         add(";", "+",   1f, BeebKeys.BBCKEY_SEMICOLON);
         add(":", "*",   1f, BeebKeys.BBCKEY_COLON);
         add("]", "}",  1f, BeebKeys.BBCKEY_BRACKET_RIGHT_SQ);
-        add(new String(new char[] {0x2190}), null,  1f, BeebKeys.BBCKEY_ARROW_LEFT);
-        add(new String(new char[] {0x2192}), null,  1f, BeebKeys.BBCKEY_ARROW_RIGHT);
+        add("\u2190", null,  1f, BeebKeys.BBCKEY_ARROW_LEFT);
+        add("\u2192", null,  1f, BeebKeys.BBCKEY_ARROW_RIGHT);
         addRow();
         add("Z", null, 1f, BeebKeys.BBCKEY_Z);
         add("X", null,  1f, BeebKeys.BBCKEY_X);
@@ -102,8 +102,8 @@ public class Keyboard extends TouchpadsView {
         add(",", "<",  1f, BeebKeys.BBCKEY_COMMA);
         add(".", ">",  1f, BeebKeys.BBCKEY_PERIOD);
         add("/", "?",  1f, BeebKeys.BBCKEY_SLASH);
-        add(new String(new char[] {0x2191}), null,  1f, BeebKeys.BBCKEY_ARROW_UP);
-        add(new String(new char[] {0x2193}), null,  1f, BeebKeys.BBCKEY_ARROW_DOWN);
+        add("\u2191", null,  1f, BeebKeys.BBCKEY_ARROW_UP);
+        add("\u2193", null,  1f, BeebKeys.BBCKEY_ARROW_DOWN);
         addRow();
         Key shiftkey = add("SHIFT", null, 2f, BeebKeys.BBCKEY_SHIFT);
         shiftkey.listener = new KeyListener() {

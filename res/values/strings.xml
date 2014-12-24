@@ -10,7 +10,7 @@
     <string name="app_name">Beebdroid</string>
     <string name="app_name2">the BBC Micro emulator</string>
 	<string name="about_lft">by Little Fluffy Toys Ltd</string>
-	<string name="about_lft3">www.littlefluffytoys.com</string>
+	<string name="about_lft3">www.littlefluffytoys.mobi</string>
 	<string name="about_text0">At LFT we grew up with the BBC Micro and we loved it, so we\'re bringing it back to the world! Written by LFT\'s CTO Reuben Scratton so he could play the games that LFT\'s CEO Kenton Price wrote when they were kids. Based on B-Em for Linux by Tom Walker.</string>
 	<string name="about_copyright">This FREE and OPEN SOURCE application is licensed under GNU General Public License v2.0 as detailed at http://www.gnu.org/licenses/gpl-2.0.html - we encourage others to assist us in developing Beebdroid further once the source code is publised on Github. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the license for more details.</string>
 	<string name="about_games">Beebdroid does not ship with any third party programs - these are accessed via third party websites which have hosted such programs for years. Should any licence holders object to third party websites providing such programs, please contact the third party websites in question. We are furthermore also happy to block the visibility of specific programs within Beebdroid upon written request from product licence holders. We are able to offer an in-app payment solution for your programs in such circumstances - please contact us for details.</string>

@@ -165,6 +165,9 @@ containing a value of this type.
         public static final int about_text0=0x7f080004;
         public static final int app_name=0x7f080000;
         public static final int app_name2=0x7f080001;
+        public static final int button_about=0x7f08000f;
+        public static final int button_load_disk=0x7f08000e;
+        public static final int button_switch_keyboard=0x7f08000d;
         public static final int hint_load_disks=0x7f08000a;
         public static final int hint_space_to_start=0x7f08000c;
         public static final int hint_switch_keyboards=0x7f08000b;

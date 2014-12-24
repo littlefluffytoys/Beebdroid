@@ -1,5 +1,6 @@
 /bin
 /obj
 /out
+/gen
 
 *.iws

@@ -126,10 +126,13 @@ public class Beebdroid extends Activity implements AdListener
  		
     		// Handle trigger events 
     		if (controller.controllerInfo != null) {
-	    		if (trigger != last_trigger && controller.controllerInfo.triggers != null) {
+    			final List<TriggerAction> triggers = controller.controllerInfo.triggers;
+	    		if (trigger != last_trigger && triggers != null) {
 	    			Log.d("Trigger!", "PC hit trigger " + trigger);
 	    			last_trigger = trigger;
-	    			onTriggerFired(controller.controllerInfo.triggers.get(trigger-1));
+	    			if (triggers.size() >= trigger) {
+		    			onTriggerFired(controller.controllerInfo.triggers.get(trigger-1));
+	    			}
 	    		}
     		}
     		

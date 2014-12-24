@@ -20,4 +20,7 @@
     <string name="hint_load_disks">HINT: press MENU to load disks</string>
     <string name="hint_switch_keyboards">HINT: press MENU to switch keyboards</string>
     <string name="hint_space_to_start">HINT: if a game says \'Press SPACE to start\', just touch the screen!</string>
+    <string name="button_switch_keyboard">Switch keyboard</string>
+    <string name="button_load_disk">Load Disk</string>
+    <string name="button_about">About</string>
 </resources>

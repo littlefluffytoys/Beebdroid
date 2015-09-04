@@ -38,14 +38,14 @@
 	dec %al
 	mov word ptr [%esi+%eax+0x100], \reg16    # mem+0x100 = bottom of stack space
 	dec %al
-	mov %ch, al
+	mov %ch, %al
 .endm
 .macro PULLWORD reg16
     movzx %eax, %ch
 	inc %al
 	movw \reg16, [%esi+%eax+0x100]
 	inc %al
-	mov %ch, al
+	mov %ch, %al
 .endm
 
 .macro UPDATE_TAKEINT 	# cpu->takeint=(cpu->interrupt && !(cpu->p & FLAG_I));
@@ -68,7 +68,7 @@ exec6502:
     # update cpu->cycles. Note the constant value 40000 cannot be encoded and has to be ldr'd indirectly.
     mov  %eax,[%ebp+24]
     add  %eax, 40000
-    mov  [%ebp+24], eax
+    mov  [%ebp+24], %eax
 
     # load some of 6502 CPU state into registers
     mov  %esi, [%ebp] 		# ESI = r5  = mem
@@ -103,11 +103,11 @@ loop:
 use_c_fn:
 	lea  %ebx, fns
 	mov  %ebx, [%ebx + %eax*4]
-    movw [%ebp+4], di 	#  di = PC
-    movb [%ebp+6], cl 	#  cl = A
-    movb [%ebp+7], dl 	#  dl = X
-    movb [%ebp+8], dh 	#  r9 = Y
-    movb [%ebp+9], ch 	#  r10 = S
+    movw [%ebp+4], %di 	#  di = PC
+    movb [%ebp+6], %cl 	#  cl = A
+    movb [%ebp+7], %dl 	#  dl = X
+    movb [%ebp+8], %dh 	#  r9 = Y
+    movb [%ebp+9], %ch 	#  r10 = S
 	push %ebp  	# Sole parameter for C opcode functions is r0 = CPU*
 	call %ebx
     mov  %edi, 0
@@ -172,11 +172,11 @@ no_poll_yet:
 	jg loop
 
 	# Update cpu fields, restore regs and exit
-    movw [%ebp+4], di 	#  PC
-    movb [%ebp+6], cl	#  r7 = A
-    movb [%ebp+7], dl	#  r8 = X
-    movb [%ebp+8], dh	#  r9 = Y
-    movb [%ebp+9], ch	# r10 = S
+    movw [%ebp+4], %di 	#  PC
+    movb [%ebp+6], %cl	#  r7 = A
+    movb [%ebp+7], %dl	#  r8 = X
+    movb [%ebp+8], %dh	#  r9 = Y
+    movb [%ebp+9], %ch	# r10 = S
 	popa
     ret
 
@@ -576,18 +576,18 @@ opasm_bcs:
 
 .macro BODY_BIT
     mov %bl, [%ebp+10]
-	and bl, 0x3d		# clear Z,V,N
+	and %bl, 0x3d		# clear Z,V,N
 	bt %ax, 6			    # SET_FLAG(FLAG_V, temp&0x40);
 	jnc 1f
-	or bl, 0x40
+	or %bl, 0x40
 1:
 	bt %ax, 7			    # SET_FLAG(FLAG_N, temp&0x80);
 	jnc 2f
-	or bl, 0x80
+	or %bl, 0x80
 2:
 	and %al, %cl		    # temp = cpu->a&temp
 	jnz 3f                  # SET_FLAG(FLAG_Z, !temp)
-	or bl, 2
+	or %bl, 2
 3:
     mov [%ebp+10], %bl      # save P
 .endm
@@ -914,7 +914,7 @@ opasm_jmp:
 // 0x6C: JMP ()
 opasm_jmp_ind:
 	READWORD_PC			    # register uint16_t addr=readwordpc();
-	cmp al, 255
+	cmp %al, 255
 	je 1f
 	READWORD %ax    		# cpu->pc=readword(addr);
 	mov %di, %ax
@@ -1003,7 +1003,7 @@ opasm_ldy_zp:
 // 0xB4: LDY zp,x
 .macro LOAD_ZPO dest, offset
 	READBYTE_PC			    # uint16_t addr=readmem(cpu->pc); cpu->pc++;
-	add al, \offset         # addr += cpu->x
+	add %al, \offset         # addr += cpu->x
 	READBYTE %ax   	        # cpu->a=readmem(addr);
 	mov \dest, %al
 	SETZN \dest				# setzn(cpu->a);
@@ -1715,7 +1715,7 @@ opasm_sta_abs_y:
 	READWORD_PC             # uint16_t addr=readword(cpu->pc); cpu->pc+=2;
 	add %al, %dh			# addr += cpu->y;
 	adc %ah, 0
-	WRITEBYTE %cl, ax		# writemem(addr, cpu->a);
+	WRITEBYTE %cl, %ax		# writemem(addr, cpu->a);
 	RETURN 5
 
 // 0x9D: STA abs,x
@@ -1723,7 +1723,7 @@ opasm_sta_abs_x:
 	READWORD_PC             # uint16_t addr=readword(cpu->pc); cpu->pc+=2;
 	add %al, %dl			# addr += cpu->x;
 	adc %ah, 0
-	WRITEBYTE %cl, ax		# writemem(addr, cpu->a);
+	WRITEBYTE %cl, %ax		# writemem(addr, cpu->a);
 	RETURN 5
 
 // 0x81: STA (,x)
@@ -1792,7 +1792,7 @@ opasm_undef:
 	push %ebp
 	call log_undef_opcode
 	add %esp, 4
-	dec di                  # cpu->pc--;      	// PC never moves on
+	dec %di                  # cpu->pc--;      	// PC never moves on
     mov dword ptr [%ebp+20], 0		# cpu->takeint=0; 	// Interrupts never occur
     mov dword ptr [%ebp+16], 0		# cpu->nmi=0;  		// NMIs never occur
     RETURN 65536			# return 100000; 	// Actually lasts forever, but the above code keeps executing HLT forever

@@ -52,6 +52,25 @@
 	str %r1, [%r4, #20]   	@cpu->take_int = r1
 .endm
 
+.macro LOG_CPU
+	push {lr}
+    strh %r6, [%r4, #4] 	@  r6 = PC
+    strb %r7, [%r4, #6] 	@  r7 = A
+    strb %r8, [%r4, #7] 	@  r8 = X
+    strb %r9, [%r4, #8] 	@  r9 = Y
+    strb %r10,[%r4, #9] 	@ r10 = S
+    strb %r11,[%r4, #10] 	@ r11 = P
+	mov  %r0, %r4
+	bl log_cpu
+    ldrh %r6, [%r4, #4] 	@  r6 = PC
+    ldrb %r7, [%r4, #6] 	@  r7 = A
+    ldrb %r8, [%r4, #7] 	@  r8 = X
+    ldrb %r9, [%r4, #8] 	@  r9 = Y
+    ldrb %r10,[%r4, #9] 	@ r10 = S
+    ldrb %r11,[%r4, #10] 	@ r11 = P
+    pop {lr}
+.endm
+
 exec6502:
 	push {%r4-%r12,lr}
 
@@ -75,6 +94,7 @@ exec6502:
 
     @loop
 loop:
+	//LOG_CPU
 
 	@ Trigger spotting... log PCs (NB: ALWAYS REMOVE FROM RELEASE CODE! ITS ONLY FOR FINDING GOOD PLACES FOR TRIGGERS)
 	//mov %r0, %r4

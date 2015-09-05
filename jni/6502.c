@@ -33,9 +33,19 @@ int FEslowdown[8]={1,0,1,1,0,0,1,0};
 #define push(v) cpu->mem[0x100+(cpu->s--)]=v
 #define pull()  cpu->mem[0x100+(++cpu->s)]
 
+uint8_t readmem_ex_real(uint16_t addr);
 
 uint8_t readmem_ex(uint16_t addr)
 {
+	uint8_t rv = readmem_ex_real(addr);
+	if (addr == 0xFE4f) {
+		LOGI("reading %02X from fe4f!", rv);
+	}
+	return rv;
+}
+
+uint8_t readmem_ex_real(uint16_t addr) {
+	//LOGI("readmem_ex! %04X", addr);
         uint8_t temp;
         switch (addr&~3)
         {
@@ -78,6 +88,11 @@ uint16_t readword_ex(uint16_t addr)
 
 void writemem_ex(uint16_t addr, uint8_t val)
 {
+if (addr == 0xFE4f) {
+	LOGI("writing %02X to fe4f!", val);
+}
+//LOGI("writemem_ex! addr=%04X val=%02X", addr, val);
+
 	int c;
 	if (addr<0xFC00 || addr>=0xFF00) return;
 	//PUT BACK SOMEDAY if (addr<0xFE00 || FEslowdown[(addr>>5)&7]) { if (cycles&1) {polltime(2);} else { polltime(1); } }
@@ -144,7 +159,7 @@ void reset6502()
 
 
 int adc_bcd(M6502* cpu, uint8_t temp) {
-	//LOGI("Doing ADC BCD! %d", temp);
+	LOGI("Doing ADC BCD! %d", temp);
 	register int ah=0;
 	register uint8_t tempb = cpu->a+temp+((cpu->p & FLAG_C)?1:0);
 	if (!tempb)
@@ -249,6 +264,8 @@ int vidclockacc=0;
 
 void do_poll(M6502* cpu, int c) {
 
+	//LOGI("do_poll %d", c);
+
 	if (otherstuffcount<=0) {
 		otherstuffcount+=128;
 		logvols();
@@ -289,11 +306,43 @@ void do_poll(M6502* cpu, int c) {
 
 }
 
-void logasm(int v) {
+static int s_logflag = 0;
+FILE* s_file = NULL;
+
+void log_cpu(M6502* cpu) {
+/*
+	char buff[256];
+	unsigned char* p = cpu->mem;
+    sprintf(buff, "PC:%04X (%02X %02X %02X) A:%02X X:%02X Y:%02X P:%02X\n", cpu->pc, p[cpu->pc],p[cpu->pc+1],p[cpu->pc+2], cpu->a, cpu->x, cpu->y, cpu->p);
+
+	if (!s_file) {
+		s_file = fopen("/sdcard/6502.log","w+");
+	}
+
+    if (s_file) {
+        fputs(buff, s_file);
+        fflush(s_file);
+        //fclose(file);
+    } else {
+    	LOGI("Oops! Cant log!");
+    	//LOGI("%s", buff);
+    }
+
+	//if (s_logflag || cpu->pc >= 0xe000) {
+	//s_logflag = 1;
+	//usleep(1000);
+	//}
+	*/
+}
+void log_asm(int v) {
 	LOGI("here! %08x", v);
 }
+void log_write(uint32_t val, uint32_t addr) {
+	//LOGI("write: %08x  %02x", addr, val);
+}
 void log_undef_opcode(M6502* cpu) {
-	LOGI("Undefined opciode! pc=%04x", cpu->pc);
+	LOGI("Undefined opcode! pc=%04x", cpu->pc);
+	exit(1);
 }
 
 

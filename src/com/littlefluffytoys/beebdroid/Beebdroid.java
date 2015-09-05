@@ -916,13 +916,15 @@ public class Beebdroid extends Activity implements AdListener
 		int[] red = new int[1];
 		int[] blue = new int[1];
 		int[] green = new int[1];
-		
+		int[] alpha = new int[1];
 		for(int i = 0; i < 100; i++) {
 			if (conf[i] == null)
 				break;			
 			egl.eglGetConfigAttrib(display, conf[i], EGL10.EGL_RED_SIZE, red);			
 			egl.eglGetConfigAttrib(display, conf[i], EGL10.EGL_BLUE_SIZE, blue);
 			egl.eglGetConfigAttrib(display, conf[i], EGL10.EGL_GREEN_SIZE, green);
+			egl.eglGetConfigAttrib(display, conf[i], EGL10.EGL_ALPHA_SIZE, alpha);
+			android.util.Log.d("Beebdroid", "conf: R:" + red[0] + " G:" + green[0] + " B:" + blue[0] + " A:"+alpha[0]);
 			if (red[0]==5  && green[0]==6 && blue[0]==5) {
 				return conf[i];
 			}									

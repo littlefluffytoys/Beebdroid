@@ -460,7 +460,6 @@ JNIEXPORT jint JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInitGl(J
 
 void blit_to_screen(int source_x, int source_y, int width, int height)
 {
-
 	glViewport(0, 0, beebview_width, beebview_height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -469,7 +468,7 @@ void blit_to_screen(int source_x, int source_y, int width, int height)
 
     glBindTexture(GL_TEXTURE_2D, tex);
 
-    //LOGI("source_y=%d, height=%d", source_y, height);
+    //LOGI("blit_to_screen source_y=%d, height=%d", source_y, height);
     textureCoords[0] = textureCoords[4] = (float)source_x / (float)1024.0f;
     textureCoords[2] = textureCoords[6] = (float)(source_x+width) / (float)1024.0f;
     textureCoords[5] = textureCoords[7] = (float)source_y / (float)512.0f;

@@ -152,6 +152,7 @@ void writeIC32(uint8_t val)
 
 void writedatabus(uint8_t val)
 {
+//    LOGI("writedatabus %02X", val);
         sdbval=val;
         if (!(IC32&8))
         {
@@ -165,7 +166,7 @@ void writedatabus(uint8_t val)
 
 void writesysvia(uint16_t addr, uint8_t val)
 {
-//        rpclog("Write SYS VIA %04X %02X %04X %i,%i\n",addr,val,pc,vc,sc);
+        //LOGI("Write SYS VIA %04X %02X %04X",addr,val,the_cpu->pc);
         switch (addr&0xF)
         {
                 case ORA:
@@ -174,7 +175,9 @@ void writesysvia(uint16_t addr, uint8_t val)
                 updatesysIFR();
                 case ORAnh:
                 sysvia.ora=val;
+                //LOGI("ORAnh pre porta=%02X ddra=%02X", sysvia.porta, sysvia.ddra);
                 sysvia.porta=(sysvia.porta & ~sysvia.ddra)|(sysvia.ora & sysvia.ddra);
+                //LOGI("ORAnh post porta=%02X", sysvia.porta);
                 writedatabus(val);
                 break;
 
@@ -274,10 +277,18 @@ void writesysvia(uint16_t addr, uint8_t val)
         }
 }
 
+uint8_t readsysvia_real(uint16_t addr);
+
 uint8_t readsysvia(uint16_t addr)
 {
+    uint8_t rv = readsysvia_real(addr);
+    //LOGI("Read SYS VIA %04X : %02X", addr, rv);
+    return rv;
+}
+
+uint8_t readsysvia_real(uint16_t addr)
+{
         uint8_t temp;
-//        rpclog("Read SYS VIA %04X\n",addr);
         addr&=0xF;
         switch (addr&0xF)
         {
@@ -287,6 +298,7 @@ uint8_t readsysvia(uint16_t addr)
                 case ORAnh:
                 	//rjh                 if (MASTER && cmosenabled() && !compactcmos) return cmosread();
                 temp=sysvia.ora & sysvia.ddra;
+                    //LOGI("reading sysvia ORAnh temp=%02X porta=%02X ddra=%02X", temp, sysvia.porta, sysvia.ddra);
                 temp|=(sysvia.porta & ~sysvia.ddra);
                 temp&=0x7F;
                 if (bbckey[keycol][keyrow]) return temp|0x80;

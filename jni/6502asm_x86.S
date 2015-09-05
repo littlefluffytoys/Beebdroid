@@ -25,6 +25,57 @@
 # r10 = S       ch
 # r11 = P
 
+.macro C_CALL_PRE
+	push %ecx
+	push %edx
+	//pusha
+.endm
+
+.macro C_CALL_POST
+	pop %edx
+	pop %ecx
+	//popa
+.endm
+
+.macro LOG_CPU
+    movw [%ebp+4], %di 	#  di = PC
+    movb [%ebp+6], %cl 	#  cl = A
+    movb [%ebp+7], %dl 	#  dl = X
+    movb [%ebp+8], %dh 	#  r9 = Y
+    movb [%ebp+9], %ch 	#  r10 = S
+    pusha
+	push %ebp
+	call log_cpu
+	add %esp,4
+	popa
+    movw %di,  [%ebp+4] 	#  di = r6  = PC
+    movb %cl,  [%ebp+6] 	#  cl = r7  = A
+    movb %dl,  [%ebp+7] 	#  dl = r8  = X
+    movb %dh,  [%ebp+8] 	#  dh = r9  = Y
+    movb %ch,  [%ebp+9] 	#  ch = r10 = S
+.endm
+
+.macro LOG arg
+    pusha
+    mov %eax, \arg
+	push %eax
+	call log_asm
+	add %esp,4
+	popa
+.endm
+.macro LOG_WRITEBYTE val8, addr16
+    pusha
+    mov %edx,0
+    mov %dx, \addr16
+	push %edx
+	mov %edx,0
+	mov %dl, \val8
+	push %edx
+	call log_write
+	add %esp,8
+	popa
+.endm
+
 
 // branch without labels: count number of lines to skip over, add 1, multiply by 4. So to skip 2 lines, "b .+12"
 
@@ -33,37 +84,42 @@
 	mov byte ptr [%esi+%ebx+0x100], \reg8    # mem+0x100 = bottom of stack space
 	dec %ch
 .endm
-.macro PUSHWORD reg16
+.macro PULLBYTE
+	inc %ch
     movzx %eax, %ch
-	dec %al
+	movb %al, [%esi + %eax + 0x100]  	# scrapreg = mem+0x100, i.e. bottom of stack space
+.endm
+
+.macro PUSHWORD reg16
+	dec %ch
+    movzx %eax, %ch
 	mov word ptr [%esi+%eax+0x100], \reg16    # mem+0x100 = bottom of stack space
-	dec %al
-	mov %ch, %al
+	dec %ch
 .endm
 .macro PULLWORD reg16
+	inc %ch
     movzx %eax, %ch
-	inc %al
-	movw \reg16, [%esi+%eax+0x100]
-	inc %al
-	mov %ch, %al
+	movw \reg16, word ptr [%esi+%eax+0x100]
+	inc %ch
 .endm
 
 .macro UPDATE_TAKEINT 	# cpu->takeint=(cpu->interrupt && !(cpu->p & FLAG_I));
-	mov  %eax,0
 	cmp dword ptr [%ebp+12], 0	# r12 = cpu->interrupt
 	jz  1f
 	test byte ptr [%ebp+10], 4  		# test the FLAG_I
 	jnz 1f
-	mov %eax,1
+	mov dword ptr [%ebp+20], 1
+	jmp 2f
 1:
-	mov [%ebp+20], %eax   	#cpu->take_int = r1
+	mov dword ptr [%ebp+20], 0   				#cpu->take_int = r1
+2:
 .endm
 
 exec6502:
 	pusha
 
 	# Keep CPU* in EBP
-	mov %ebp,acpu  #ldr  %r4, =acpu
+	lea %ebp,acpu
 
     # update cpu->cycles. Note the constant value 40000 cannot be encoded and has to be ldr'd indirectly.
     mov  %eax,[%ebp+24]
@@ -78,11 +134,10 @@ exec6502:
     movb %dl,  [%ebp+7] 	#  dl = r8  = X
     movb %dh,  [%ebp+8] 	#  dh = r9  = Y
     movb %ch,  [%ebp+9] 	#  ch = r10 = S
-    //ldrb %r11,[%r4, #10] 	# [EBP+10] = r11 = P
 
     // eax,ebx are free for general use
-
 loop:
+    //LOG_CPU
 
 	# Get the opcode into eax and update cpu->PC
 	xor %eax,%eax
@@ -110,6 +165,7 @@ use_c_fn:
     movb [%ebp+9], %ch 	#  r10 = S
 	push %ebp  	# Sole parameter for C opcode functions is r0 = CPU*
 	call %ebx
+	add %esp, 4
     mov  %edi, 0
     movw %di,  [%ebp+4] 	#  di = r6  = PC
     movb %cl,  [%ebp+6] 	#  cl = r7  = A
@@ -142,15 +198,14 @@ no_nmi:
 	pushw 0xfffe
 do_interrupt:
 	PUSHWORD %di			# push(cpu->pc)
-	xor %eax, %eax
-	mov %al, [%ebp+10]
+	movzx %eax, byte ptr [%ebp+10]
 	or  %eax, 0x20   	# uint8_t temp = cpu->p | 0x20;
 	PUSH_BYTE %al             # push(temp);
 	popw %ax
 	movw %di, [%esi+%eax] 		# cpu->pc=*(uint16_t*)&(cpu->mem[0xfffe]);
 	or byte ptr [%ebp+10], 4 	# cpu->p |= FLAG_I;
-	movw [%ebp+4],di            # Remove when C-only
-	movb [%ebp+9],ch    	    # Remove when C-only
+	movw [%ebp+4],%di            # Remove when C-only
+	movb [%ebp+9],%ch    	    # Remove when C-only
 	pop %eax
 	add %eax,7		            # c += 7;
 	push %eax
@@ -162,10 +217,14 @@ no_interrupt:
 	sub [%ebp+24], %eax
 
 	# Update intermediate cycle counter
-	push %ebp
+	C_CALL_PRE
 	push %eax
+	push %ebp
  	call do_poll
-no_poll_yet:
+ 	add %esp,8
+ 	C_CALL_POST
+
+	mov %eax, [%ebp+24]
 
 	# Loop back until cpu->cycles <=0
 	cmp dword ptr [%ebp+24], 0
@@ -181,8 +240,6 @@ no_poll_yet:
     ret
 
 
-
-
 // branch without labels: count number of lines to skip over, add 1, multiply by 4. So to skip 2 lines, "b .+12"
 
 /**********
@@ -193,14 +250,16 @@ no_poll_yet:
 
 .macro READBYTE addr16       # #define readmem(x)  ((x<0xfe00) ? cpu->mem[x] : readmem_ex(x))
 	cmp \addr16, 0xfe00
-	jge 1f
+	jae 1f
 	movzx %eax, \addr16
 	movzx %eax, byte ptr [%esi + %eax]
 	jmp 2f
 1:
-	push \addr16
+	C_CALL_PRE
+	pushw \addr16
 	call readmem_ex
-	add %esp,4
+	add %esp,2
+	C_CALL_POST
 2:
 .endm
 
@@ -212,14 +271,16 @@ no_poll_yet:
 //#define readword(x) ((x<0xfe00) ? (*((uint16_t*)&(cpu->mem[x]))) : (readmem_ex(x) | (readmem_ex(x+1)<<8)))
 .macro READWORD src
 	cmp \src, 0xfe00
-	jge 1f
+	jae 1f
 	movzx %eax, \src
 	movzx %eax, word ptr [%esi + %eax]
 	jmp 2f
 1:
-	push \src
+	C_CALL_PRE
+	pushw \src
 	call readword_ex
-	add %esp,4
+	add %esp,2
+	C_CALL_POST
 2:
 .endm
 
@@ -235,15 +296,18 @@ no_poll_yet:
 .macro WRITEBYTE val, addr
     movzx %ebx,\addr
 	cmp %ebx,0x8000
-	jge 1f
+	jae 1f
+	LOG_WRITEBYTE \val, %bx
 	movb [%esi + %ebx], \val
 	jmp 2f
 1:
+	C_CALL_PRE
 	movzx %eax,\val
-	push %eax
-	push %ebx
+	push %ax
+	push %bx
 	call writemem_ex
-	add %esp, 8
+	add %esp, 4
+	C_CALL_POST
 2:
 .endm
 
@@ -256,22 +320,18 @@ no_poll_yet:
 
 // #define setzn(v) if(v) cpu->p &=~FLAG_Z; else cpu->p|=FLAG_Z;  if ((v)&0x80) cpu->p|=FLAG_N; else cpu->p&=~FLAG_N;
 .macro SETZN v
-	and byte ptr [%ebp+10], 0x7E  # i.e. clear flags reg bits 0x80 (N) and 0x02 (Z).
+	and byte ptr [%ebp+10], 0x7D  # i.e. clear flags reg bits 0x80 (N) and 0x02 (Z).
 	cmp \v, 0
 	jne 1f
 	or byte ptr [%ebp+10], 0x02   # set Z flag
 1:
-    cmp \v, 0x7f
-    jle 2f
+	movzx %ax, \v
+    bt %ax, 7
+    jnc 2f
 	or byte ptr [%ebp+10], 0x80   # set N flag
 2:
 .endm
 
-.macro PULLBYTE
-    movzx %eax, %ch
-	movb %al, [%esi + %eax + 0x100]  	# scrapreg = mem+0x100, i.e. bottom of stack space
-	inc %ch
-.endm
 
 
 /**********************************
@@ -357,7 +417,7 @@ no_poll_yet:
 	bt %bx,0
 	adc %cl, %al
 	pushf
-	pop %ax
+	pop %eax
 	and %bl, 0xBE # clear C and V
 	bt %ax,0
 	jnc 1f
@@ -369,13 +429,15 @@ no_poll_yet:
 2:
     mov byte ptr [%ebp+10], %bl
 	SETZN %cl				# setzn(cpu->a);
-	jmp 4
+	jmp 4f
 3:
 	movb [%ebp+6], %cl	    # update A
+	C_CALL_PRE
 	push %eax
 	push %ebp   			# r0=cpu*, r1=imm
 	call adc_bcd
 	add %esp, 8
+	C_CALL_POST
 	movb %cl, [%ebp+6]	    # update A
 4:
     pop %ebx
@@ -543,7 +605,7 @@ opasm_asl_abs_x:
 	READBYTE %di		    # register int8_t offset=(int8_t)readmem(cpu->pc);
 	movsx %eax, %al         # to get the byte offset into a signed word
 	inc %di 				# pc++;
-	and byte ptr [%ebp+10], \flag # if (!(cpu->p & FLAG_Z)) {
+	test byte ptr [%ebp+10], \flag # if (!(cpu->p & FLAG_Z)) {
 	\testop 1f
 	add %di, %ax			#     cpu->pc+=offset;
 	RETURN 3				# }
@@ -630,7 +692,7 @@ opasm_cli:
 	and byte ptr [%ebp+10], 0xFE    # clear FLAG_C
 	mov %ah, \reg8
 	sub %ah, %al                    #ah = cpureg - temp
-    jnc 1f
+    jc 1f
 	or byte ptr [%ebp+10], 1	    # set FLAG_C if carried
 1:
 	SETZN %ah				        # setzn(temp);
@@ -1024,7 +1086,7 @@ opasm_ldy_zp_x:
 	READBYTE %ax   	        # cpu->a=readmem(addr);
 	mov \dest, %al
 	SETZN \dest				# setzn(cpu->a);
-	RETURN 4
+    RETURN 4
 .endm
 opasm_lda_abs:
 	LOAD_ABS %cl
@@ -1259,9 +1321,9 @@ opasm_pla:
 // 0x28: PLP
 opasm_plp:
 	PULLBYTE    			# uint8_t temp=pull();
-	mov %ch, %al
 	//TODO! cpu->takeint=(cpu->interrupt && !(cpu->p & FLAG_I));
-	and %ch, 0xCF	        # cpu->p = temp & ~0x30;
+	and %al, 0xCF	        # cpu->p = temp & ~0x30;
+	mov [%ebp+10], %al
 	RETURN -4
 
 
@@ -1524,7 +1586,7 @@ opasm_rts:
     bt %bx, 0               # get FLAG_C into x86 carry flag
     sbb %cl, %al            # x86 SBB  works exact same way as 6502 SBC
 	pushf
-	pop %ax
+	pop %eax
 	and %bl, 0xBE           # clear C and V
 	bt %ax,0
 	jnc 1f
@@ -1536,13 +1598,15 @@ opasm_rts:
 2:
     mov byte ptr [%ebp+10], %bl
 	SETZN %cl				# setzn(cpu->a);
-	jmp 4
+	jmp 4f
 3:
 	movb [%ebp+6], %cl	    # update A
+	C_CALL_PRE
 	push %eax
 	push %ebp
 	call sbc_bcd
 	add %esp, 8
+	C_CALL_POST
 	movb %cl,  [%ebp+6]     # update A
 4:
     pop %ebx
@@ -1782,277 +1846,280 @@ opasm_tya:
 	RETURN 2
 
 
-
-
-
 /********************
  * Undefined Opcode *
  ********************/
 opasm_undef:
+	C_CALL_PRE
 	push %ebp
 	call log_undef_opcode
 	add %esp, 4
+	C_CALL_POST
 	dec %di                  # cpu->pc--;      	// PC never moves on
     mov dword ptr [%ebp+20], 0		# cpu->takeint=0; 	// Interrupts never occur
     mov dword ptr [%ebp+16], 0		# cpu->nmi=0;  		// NMIs never occur
     RETURN 65536			# return 100000; 	// Actually lasts forever, but the above code keeps executing HLT forever
 
 
+
+.section .rodata
+.balign 4
+
 fns_asm:
-	.word 0 				// 0x00 BRK
-	.word opasm_ora_indzx 	// 0x01 ORA (,x)
-	.word opasm_undef
-	.word opasm_slo_indzx   // 0x03: SLO (,x)		undocumented
-	.word opasm_nop_zp  	// 0x04: NOP zp			undocumented
-	.word opasm_ora_zp		// 0x05: ORA zp
-	.word opasm_asl_zp		// 0x06: ASL zp
-	.word opasm_slo_zp  	// 0x07: SLO zp			undocumented
-	.word opasm_php     	// 0x08: PHP
-	.word opasm_ora_imm 	// 0x09: ORA imm
-	.word opasm_asl_a   	// 0x0A: ASL A
-	.word 0 				// 0x0B: ANC imm		undocumented
-	.word opasm_nop_abs 	// 0x0C: NOP abs		undocumented
-	.word opasm_ora_abs 	// 0x0D: ORA abs
-	.word opasm_asl_abs		// 0x0E: ASL abs
-	.word opasm_slo_abs 	// 0x0F: SLO abs		undocumented
-	.word opasm_bpl 		// 0x10: BPL
-	.word opasm_ora_indzy  	// 0x11: ORA (),y
-	.word opasm_undef
-	.word opasm_slo_indzy   // 0x13: SLO (),y		undocumented
-	.word opasm_nop_zp_x	// 0x14: NOP zp,x		undocumented
-	.word opasm_ora_zp_x	// 0x15: ORA zp,x
-	.word opasm_asl_zp_x	// 0x16: ASL zp,x
-	.word opasm_slo_zp_x	// 0x17: SLO zp,x		undocumented
-	.word opasm_clc 		// 0x18: CLC
-	.word opasm_ora_abs_y	// 0x19: ORA abs,y
-	.word opasm_nop     	// 0x1A: NOP			undocumented
-	.word opasm_slo_abs_y	// 0x1B: SLO abs,y		undocumented
-	.word opasm_nop_abs_x	// 0x1C: NOP abs,x		undocumented
-	.word opasm_ora_abs_x	// 0x1D: ORA abs,x
-	.word opasm_asl_abs_x	// 0x1E: ASL abs,x
-	.word opasm_slo_abs_x	// 0x1F: SLO abs,x		undocumented
-	.word opasm_jsr     	// 0x20: JSR
-	.word opasm_and_indzx   // 0x21: AND (,x)
-	.word opasm_undef
-	.word opasm_rla_indzx	// 0x23: RLA (,x)		undocumented
-	.word opasm_bit_zp		// 0x24: BIT zp
-	.word opasm_and_zp		// 0x25: AND zp
-	.word opasm_rol_zp  	// 0x26: ROL zp
-	.word opasm_rla_zp  	// 0x27: RLA zp			undocumented
-	.word opasm_plp     	// 0x28: PLP
-	.word opasm_and_imm		// 0x29: AND
-	.word opasm_rol_a   	// 0x2A: ROL A
-	.word 0 				// 0x2B: ANC imm		undocumented
-	.word opasm_bit_abs		// 0x2C: BIT abs
-	.word opasm_and_abs		// 0x2D: AND abs
-	.word opasm_rol_abs		// 0x2E: ROL abs
-	.word opasm_rla_abs 	// 0x2F: RLA abs		undocumented
-	.word opasm_bmi 		// 0x30: BMI
-	.word opasm_and_indzy   // 0x31: AND (),y
-	.word opasm_undef
-	.word opasm_rla_indzy   // 0x33: RLA (),y		undocumented
-	.word opasm_nop_zp_x	// 0x34: NOP zp,x		undocumented
-	.word opasm_and_zp_x	// 0x35: AND zp,x
-	.word opasm_rol_zp_x	// 0x36: ROL zp,x
-	.word opasm_rla_zp_x	// 0x37: RLA zp,x		undocumented
-	.word opasm_sec 		// 0x38: SEC
-	.word opasm_and_abs_y	// 0x39: AND abs,y
-	.word opasm_nop	    	// 0x3A: NOP			undocumented
-	.word opasm_rla_abs_y	// 0x3B: RLA abs,y		undocumented
-	.word opasm_nop_abs_x	// 0x3C: NOP abs,x		undocumented
-	.word opasm_and_abs_x	// 0x3D: AND abs,x
-	.word opasm_rol_abs_x	// 0x3E: ROL abs,x
-	.word opasm_rla_abs_x	// 0x3F: RLA abs,x		undocumented
-	.word opasm_rti			// 0x40: RTI
-	.word opasm_eor_indzx	// 0x41: EOR (,x)
-	.word opasm_undef
-	.word 0   				// 0x43: SRE (,x)		undocumented
-	.word opasm_nop_zp  	// 0x44: NOP zp
-	.word opasm_eor_zp  	// 0x45: EOR zp
-	.word opasm_lsr_zp  	// 0x46: LSR zp
-	.word 0  				// 0x47: SRE zp			undocumented
-	.word opasm_pha     	// 0x48: PHA
-	.word opasm_eor_imm 	// 0x49: EOR imm
-	.word opasm_lsr_a   	// 0x4A: LSR A
-	.word 0 				// 0x4B: ASR imm		undocumented
-	.word opasm_jmp			// 0x4C: JMP
-	.word opasm_eor_abs		// 0x4D: EOR abs
-	.word opasm_lsr_abs		// 0x4E: LSR abs
-	.word 0 				// 0x4F: SRE abs		undocumented
-	.word opasm_bvc 		// 0x50: BVC
-	.word opasm_eor_indzy	// 0x51: EOR (),y
-	.word opasm_undef
-	.word 0   				// 0x53: SRE (),y		undocumented
-	.word opasm_nop_zp_x	// 0x54: NOP zp,x
-	.word opasm_eor_zp_x	// 0x55: EOR zp,x
-	.word opasm_lsr_zp_x	// 0x56: LSR zp,x
-	.word 0					// 0x57: SRE zp,x		undocumented
-	.word opasm_cli     	// 0x58: CLI
-	.word opasm_eor_abs_y	// 0x59: EOR abs,y
-	.word opasm_nop 		// 0x5A: NOP			undocumented
-	.word 0					// 0x5B: SRE abs,y		undocumented
-	.word opasm_nop_abs_x	// 0x5C: NOP abs,x		undocumented
-	.word opasm_eor_abs_x	// 0x5D: EOR abs,x
-	.word opasm_lsr_abs_x	// 0x5E: LSR abs,x
-	.word 0					// 0x5F: SRE abs,x		undocumented
-	.word opasm_rts 		// 0x60: RTS
-	.word opasm_adc_indzx   // 0x61: ADC (,x)
-	.word opasm_undef
-	.word opasm_rra_indzx   // 0x63: RRA (,x)		undocumented
-	.word opasm_nop_zp  	// 0x64: NOP zp			undocumented
-	.word opasm_adc_zp  	// 0x65: ADC zp
-	.word opasm_ror_zp		// 0x66: ROR zp
-	.word opasm_rra_zp  	// 0x67: RRA zp			undocumented
-	.word opasm_pla    		// 0x68: PLA
-	.word opasm_adc_imm 	// 0x69: ADC imm
-	.word opasm_ror_a   	// 0x6A: ROR A
-	.word 0     			// 0x6B: ARR			undocumented
-	.word opasm_jmp_ind		// 0x6C: JMP ()
-	.word opasm_adc_abs 	// 0x6D: ADC abs
-	.word opasm_ror_abs 	// 0x6E: ROR abs
-	.word opasm_rra_abs 	// 0x6F: RRA abs		undocumented
-	.word opasm_bvs     	// 0x70: BVS
-	.word opasm_adc_indzy   // 0x71: ADC (),y
-	.word opasm_undef
-	.word opasm_rra_indzy  	// 0x73: RRA (),y		undocumented
-	.word opasm_nop_zp_x	// 0x74: NOP zp,x		undocumented
-	.word opasm_adc_zp_x 	// 0x75: ADC zp,x
-	.word opasm_ror_zp_x	// 0x76: ROR zp,x
-	.word opasm_rra_zp_x	// 0x77: RRA zp,x		undocumented
-	.word opasm_sei     	// 0x78: SEI
-	.word opasm_adc_abs_y	// 0x79: ADC abs,y
-	.word opasm_nop			// 0x7A: NOP			undocumented
-	.word opasm_rra_abs_y	// 0x7B: RRA abs,y		undocumented
-	.word opasm_undef
-	.word opasm_adc_abs_x	// 0x7D: ADC abs,x
-	.word opasm_ror_abs_x	// 0x7E: ROR abs,x
-	.word opasm_rra_abs_x	// 0x7F: RRA abs,x		undocumented
-	.word opasm_nop_imm  	// 0x80: NOP imm		undocumented
-	.word opasm_sta_indzx	// 0x81: STA (,x)
-	.word opasm_nop_imm 	// 0x82: NOP imm		undocumented
-	.word 0   				// 0x83: SAX (,x)		undocumented
-	.word opasm_sty_zp  	// 0x84: STY zp
-	.word opasm_sta_zp  	// 0x85: STA zp
-	.word opasm_stx_zp  	// 0x86: STX zp
-	.word 0  				// 0x87: SAX zp			undocumented
-	.word opasm_dey     	// 0x88: DEY
-	.word opasm_nop_imm 	// 0x89: NOP imm		undocumented
-	.word opasm_txa     	// 0x8A: TXA
-	.word 0     			// 0x8B: ANE			undocumented
-	.word opasm_sty_abs 	// 0x8C: STY abs
-	.word opasm_sta_abs 	// 0x8D: STA abs
-	.word opasm_stx_abs 	// 0x8E: STX abs
-	.word 0 				// 0x8F: SAX abs		undocumented
-	.word opasm_bcc     	// 0x90: BCC
-	.word opasm_sta_indzy	// 0x91: STA (),y
-	.word opasm_undef
-	.word 0   				// 0x93: SHA (),y		undocumented
-	.word opasm_sty_zp_x	// 0x94: STY zp,x
-	.word opasm_sta_zp_x	// 0x95: STA zp,x
-	.word opasm_stx_zp_y	// 0x96: STX zp,y
-	.word 0					// 0x97: SAX zp,y		undocumented
-	.word opasm_tya     	// 0x98: TYA
-	.word opasm_sta_abs_y	// 0x99: STA abs,y
-	.word opasm_txs     	// 0x9A: TXS
-	.word 0					// 0x9B: SHS abs,y		undocumented
-	.word 0					// 0x9C: SHY abs,x		undocumented
-	.word opasm_sta_abs_x	// 0x9D: STA abs,x
-	.word 0					// 0x9E: SHX abs,y		undocumented
-	.word 0					// 0x9F: SHA abs,y		undocumented
-	.word opasm_ldy_imm 	// 0xA0: LDY imm
-	.word opasm_lda_indzx   // 0xA1: LDA (,x)
-	.word opasm_ldx_imm 	// 0xA2: LDX imm
-	.word 0   				// 0xA3: LAX (,y)		undocumented
-	.word opasm_ldy_zp  	// 0xA4: LDY zp
-	.word opasm_lda_zp  	// 0xA5: LDA zp
-	.word opasm_ldx_zp		// 0xA6: LDX zp
-	.word 0  				// 0xA7: LAX zp			undocumented
-	.word opasm_tay     	// 0xA8: TAY
-	.word opasm_lda_imm 	// 0xA9: LDA imm
-	.word opasm_tax     	// 0xAA: TAX
-	.word 0     			// 0xAB: LAX			undocumented
-	.word opasm_ldy_abs 	// 0xAC: LDY abs
-	.word opasm_lda_abs 	// 0xAD: LDA abs
-	.word opasm_ldx_abs 	// 0xAE: LDX abs
-	.word 0 				// 0xAF: LAX abs
-	.word opasm_bcs     	// 0xB0: BCS
-	.word opasm_lda_y   	// 0xB1: LDA (),y
-	.word opasm_undef
-	.word 0  				// 0xB3: LAX (),y
-	.word opasm_ldy_zp_x	// 0xB4: LDY zp,x
-	.word opasm_lda_zp_x	// 0xB5: LDA zp,x
-	.word opasm_ldx_zp_y	// 0xB6: LDX zp,y
-	.word opasm_lax_zp_y	// 0xB7: LAX zp,y
-	.word opasm_clv     	// 0xB8: CLV
-	.word opasm_lda_abs_y	// 0xB9: LDA abs,y
-	.word opasm_tsx     	// 0xBA: TSX
-	.word 0					// 0xBB: LAS abs,y		undocumented
-	.word opasm_ldy_abs_x	// 0xBC: LDY abs,x
-	.word opasm_lda_abs_x	// 0xBD: LDA abs,x
-	.word opasm_ldx_abs_y	// 0xBE: LDX abs,y
-	.word 0					// 0xBF: LAX abs,y
-	.word opasm_cpy_imm 	// 0xC0: CPY imm
-	.word opasm_cmp_indzx	// 0xC1: CMP (,x)
-	.word opasm_nop_imm 	// 0xC2: NOP imm		undocumented
-	.word 0					// 0xC3: DCP (,x)		undocumented
-	.word opasm_cpy_zp  	// 0xC4: CPY zp
-	.word opasm_cmp_zp		// 0xC5: CMP zp
-	.word opasm_dec_zp  	// 0xC6: DEC zp
-	.word 0  				// 0xC7: DCP zp			undocumented
-	.word opasm_iny     	// 0xC8: INY
-	.word opasm_cmp_imm 	// 0xC9: CMP imm
-	.word opasm_dex     	// 0xCA: DEX
-	.word 0 				// 0xCB: SBX imm		undocumented
-	.word opasm_cpy_abs		// 0xCC: CPY abs
-	.word opasm_cmp_abs		// 0xCD: CMP abs
-	.word opasm_dec_abs		// 0xCE: DEC abs
-	.word 0 				// 0xCF: DCP abs		undocumented
-	.word opasm_bne     	// 0xD0: BNE
-	.word opasm_cmp_indzy	// 0xD1: CMP (),y
-	.word opasm_undef
-	.word 0					// 0xD3: DCP (),y		undocumented
-	.word opasm_nop_zp_x	// 0xD4: NOP zp,x		undocumented
-	.word opasm_cmp_zp_x	// 0xD5: CMP zp,x
-	.word opasm_dec_zp_x	// 0xD6: DEC zp,x
-	.word 0					// 0xD7: DCP zp,x		undocumented
-	.word opasm_cld     	// 0xD8: CLD
-	.word opasm_cmp_abs_y	// 0xD9: CMP abs,y
-	.word opasm_nop     	// 0xDA: NOP			undocumented
-	.word 0					// 0xDB: DCP abs,y		undocumented
-	.word opasm_nop_abs_x	// 0xDC: NOP abs,x		undocumented
-	.word opasm_cmp_abs_x	// 0xDD: CMP abs,x
-	.word opasm_dec_abs_x	// 0xDE: DEC abs,x
-	.word 0					// 0xDF: DCP abs,x		undocumented
-	.word opasm_cpx_imm 	// 0xE0: CPX imm
-	.word opasm_sbc_indzx	// 0xE1: SBC (,x)
-	.word opasm_nop_imm 	// 0xE2: NOP imm		undocumented
-	.word 0					// 0xE3: ISB (,x)		undocumented
-	.word opasm_cpx_zp  	// 0xE4: CPX zp
-	.word opasm_sbc_zp  	// 0xE5: SBC zp
-	.word opasm_inc_zp  	// 0xE6: INC zp
-	.word 0  				// 0xE7: ISB zp			undocumented
-	.word opasm_inx     	// 0xE8: INX
-	.word opasm_sbc_imm 	// 0xE9: SBC imm
-	.word opasm_nop     	// 0xEA: NOP
-	.word opasm_sbc_imm 	// 0xEB: SBC imm		undocumented
-	.word opasm_cpx_abs		// 0xEC: CPX abs
-	.word opasm_sbc_abs 	// 0xED: SBC abs
-	.word opasm_inc_abs 	// 0xEE: INC abs
-	.word 0 				// 0xEF: ISB abs		undocumented
-	.word opasm_beq    		// 0xF0: BEQ
-	.word opasm_sbc_indzy	// 0xF1: SBC (),y
-	.word opasm_undef
-	.word 0					// 0xF3: ISB (),y		undocumented
-	.word opasm_nop_zp_x 	// 0xF4: NOP zp,x		undocumented
-	.word opasm_sbc_zp_x	// 0xF5: SBC zp,x
-	.word opasm_inc_zp_x	// 0xF6: INC zp,x
-	.word 0					// 0xF7: ISB zp,x		undocumented
-	.word opasm_sed     	// 0xF8: SED
-	.word opasm_sbc_abs_y	// 0xF9: SBC abs,y
-	.word opasm_nop     	// 0xFA: NOP			undocumented
-	.word 0					// 0xFB: ISB abs,y		undocumented
-	.word opasm_nop_abs_x	// 0xFC: NOP abs,x		undocumented
-	.word opasm_sbc_abs_x	// 0xFD: SBC abs,x
-	.word opasm_inc_abs_x	// 0xFE: INC abs,x
-	.word 0					// 0xFF: ISB abs,x		undocumented
+	.long 0 				// 0x00 BRK
+	.long opasm_ora_indzx 	// 0x01 ORA (,x)
+	.long opasm_undef
+	.long opasm_slo_indzx   // 0x03: SLO (,x)		undocumented
+	.long opasm_nop_zp  	// 0x04: NOP zp			undocumented
+	.long opasm_ora_zp		// 0x05: ORA zp
+	.long opasm_asl_zp		// 0x06: ASL zp
+	.long opasm_slo_zp  	// 0x07: SLO zp			undocumented
+	.long opasm_php     	// 0x08: PHP
+	.long opasm_ora_imm 	// 0x09: ORA imm
+	.long opasm_asl_a   	// 0x0A: ASL A
+	.long 0 				// 0x0B: ANC imm		undocumented
+	.long opasm_nop_abs 	// 0x0C: NOP abs		undocumented
+	.long opasm_ora_abs 	// 0x0D: ORA abs
+	.long opasm_asl_abs		// 0x0E: ASL abs
+	.long opasm_slo_abs 	// 0x0F: SLO abs		undocumented
+	.long opasm_bpl 		// 0x10: BPL
+	.long opasm_ora_indzy  	// 0x11: ORA (),y
+	.long opasm_undef
+	.long opasm_slo_indzy   // 0x13: SLO (),y		undocumented
+	.long opasm_nop_zp_x	// 0x14: NOP zp,x		undocumented
+	.long opasm_ora_zp_x	// 0x15: ORA zp,x
+	.long opasm_asl_zp_x	// 0x16: ASL zp,x
+	.long opasm_slo_zp_x	// 0x17: SLO zp,x		undocumented
+	.long opasm_clc 		// 0x18: CLC
+	.long opasm_ora_abs_y	// 0x19: ORA abs,y
+	.long opasm_nop     	// 0x1A: NOP			undocumented
+	.long opasm_slo_abs_y	// 0x1B: SLO abs,y		undocumented
+	.long opasm_nop_abs_x	// 0x1C: NOP abs,x		undocumented
+	.long opasm_ora_abs_x	// 0x1D: ORA abs,x
+	.long opasm_asl_abs_x	// 0x1E: ASL abs,x
+	.long opasm_slo_abs_x	// 0x1F: SLO abs,x		undocumented
+	.long opasm_jsr     	// 0x20: JSR
+	.long opasm_and_indzx   // 0x21: AND (,x)
+	.long opasm_undef
+	.long opasm_rla_indzx	// 0x23: RLA (,x)		undocumented
+	.long opasm_bit_zp		// 0x24: BIT zp
+	.long opasm_and_zp		// 0x25: AND zp
+	.long opasm_rol_zp  	// 0x26: ROL zp
+	.long opasm_rla_zp  	// 0x27: RLA zp			undocumented
+	.long opasm_plp     	// 0x28: PLP
+	.long opasm_and_imm		// 0x29: AND
+	.long opasm_rol_a   	// 0x2A: ROL A
+	.long 0 				// 0x2B: ANC imm		undocumented
+	.long opasm_bit_abs		// 0x2C: BIT abs
+	.long opasm_and_abs		// 0x2D: AND abs
+	.long opasm_rol_abs		// 0x2E: ROL abs
+	.long opasm_rla_abs 	// 0x2F: RLA abs		undocumented
+	.long opasm_bmi 		// 0x30: BMI
+	.long opasm_and_indzy   // 0x31: AND (),y
+	.long opasm_undef
+	.long opasm_rla_indzy   // 0x33: RLA (),y		undocumented
+	.long opasm_nop_zp_x	// 0x34: NOP zp,x		undocumented
+	.long opasm_and_zp_x	// 0x35: AND zp,x
+	.long opasm_rol_zp_x	// 0x36: ROL zp,x
+	.long opasm_rla_zp_x	// 0x37: RLA zp,x		undocumented
+	.long opasm_sec 		// 0x38: SEC
+	.long opasm_and_abs_y	// 0x39: AND abs,y
+	.long opasm_nop	    	// 0x3A: NOP			undocumented
+	.long opasm_rla_abs_y	// 0x3B: RLA abs,y		undocumented
+	.long opasm_nop_abs_x	// 0x3C: NOP abs,x		undocumented
+	.long opasm_and_abs_x	// 0x3D: AND abs,x
+	.long opasm_rol_abs_x	// 0x3E: ROL abs,x
+	.long opasm_rla_abs_x	// 0x3F: RLA abs,x		undocumented
+	.long opasm_rti			// 0x40: RTI
+	.long opasm_eor_indzx	// 0x41: EOR (,x)
+	.long opasm_undef
+	.long 0   				// 0x43: SRE (,x)		undocumented
+	.long opasm_nop_zp  	// 0x44: NOP zp
+	.long opasm_eor_zp  	// 0x45: EOR zp
+	.long opasm_lsr_zp  	// 0x46: LSR zp
+	.long 0  				// 0x47: SRE zp			undocumented
+	.long opasm_pha     	// 0x48: PHA
+	.long opasm_eor_imm 	// 0x49: EOR imm
+	.long opasm_lsr_a   	// 0x4A: LSR A
+	.long 0 				// 0x4B: ASR imm		undocumented
+	.long opasm_jmp			// 0x4C: JMP
+	.long opasm_eor_abs		// 0x4D: EOR abs
+	.long opasm_lsr_abs		// 0x4E: LSR abs
+	.long 0 				// 0x4F: SRE abs		undocumented
+	.long opasm_bvc 		// 0x50: BVC
+	.long opasm_eor_indzy	// 0x51: EOR (),y
+	.long opasm_undef
+	.long 0   				// 0x53: SRE (),y		undocumented
+	.long opasm_nop_zp_x	// 0x54: NOP zp,x
+	.long opasm_eor_zp_x	// 0x55: EOR zp,x
+	.long opasm_lsr_zp_x	// 0x56: LSR zp,x
+	.long 0					// 0x57: SRE zp,x		undocumented
+	.long opasm_cli     	// 0x58: CLI
+	.long opasm_eor_abs_y	// 0x59: EOR abs,y
+	.long opasm_nop 		// 0x5A: NOP			undocumented
+	.long 0					// 0x5B: SRE abs,y		undocumented
+	.long opasm_nop_abs_x	// 0x5C: NOP abs,x		undocumented
+	.long opasm_eor_abs_x	// 0x5D: EOR abs,x
+	.long opasm_lsr_abs_x	// 0x5E: LSR abs,x
+	.long 0					// 0x5F: SRE abs,x		undocumented
+	.long opasm_rts 		// 0x60: RTS
+	.long opasm_adc_indzx   // 0x61: ADC (,x)
+	.long opasm_undef
+	.long opasm_rra_indzx   // 0x63: RRA (,x)		undocumented
+	.long opasm_nop_zp  	// 0x64: NOP zp			undocumented
+	.long opasm_adc_zp  	// 0x65: ADC zp
+	.long opasm_ror_zp		// 0x66: ROR zp
+	.long opasm_rra_zp  	// 0x67: RRA zp			undocumented
+	.long opasm_pla    		// 0x68: PLA
+	.long opasm_adc_imm 	// 0x69: ADC imm
+	.long opasm_ror_a   	// 0x6A: ROR A
+	.long 0     			// 0x6B: ARR			undocumented
+	.long opasm_jmp_ind		// 0x6C: JMP ()
+	.long opasm_adc_abs 	// 0x6D: ADC abs
+	.long opasm_ror_abs 	// 0x6E: ROR abs
+	.long opasm_rra_abs 	// 0x6F: RRA abs		undocumented
+	.long opasm_bvs     	// 0x70: BVS
+	.long opasm_adc_indzy   // 0x71: ADC (),y
+	.long opasm_undef
+	.long opasm_rra_indzy  	// 0x73: RRA (),y		undocumented
+	.long opasm_nop_zp_x	// 0x74: NOP zp,x		undocumented
+	.long opasm_adc_zp_x 	// 0x75: ADC zp,x
+	.long opasm_ror_zp_x	// 0x76: ROR zp,x
+	.long opasm_rra_zp_x	// 0x77: RRA zp,x		undocumented
+	.long opasm_sei     	// 0x78: SEI
+	.long opasm_adc_abs_y	// 0x79: ADC abs,y
+	.long opasm_nop			// 0x7A: NOP			undocumented
+	.long opasm_rra_abs_y	// 0x7B: RRA abs,y		undocumented
+	.long opasm_undef
+	.long opasm_adc_abs_x	// 0x7D: ADC abs,x
+	.long opasm_ror_abs_x	// 0x7E: ROR abs,x
+	.long opasm_rra_abs_x	// 0x7F: RRA abs,x		undocumented
+	.long opasm_nop_imm  	// 0x80: NOP imm		undocumented
+	.long opasm_sta_indzx	// 0x81: STA (,x)
+	.long opasm_nop_imm 	// 0x82: NOP imm		undocumented
+	.long 0   				// 0x83: SAX (,x)		undocumented
+	.long opasm_sty_zp  	// 0x84: STY zp
+	.long opasm_sta_zp  	// 0x85: STA zp
+	.long opasm_stx_zp  	// 0x86: STX zp
+	.long 0  				// 0x87: SAX zp			undocumented
+	.long opasm_dey     	// 0x88: DEY
+	.long opasm_nop_imm 	// 0x89: NOP imm		undocumented
+	.long opasm_txa     	// 0x8A: TXA
+	.long 0     			// 0x8B: ANE			undocumented
+	.long opasm_sty_abs 	// 0x8C: STY abs
+	.long opasm_sta_abs 	// 0x8D: STA abs
+	.long opasm_stx_abs 	// 0x8E: STX abs
+	.long 0 				// 0x8F: SAX abs		undocumented
+	.long opasm_bcc     	// 0x90: BCC
+	.long opasm_sta_indzy	// 0x91: STA (),y
+	.long opasm_undef
+	.long 0   				// 0x93: SHA (),y		undocumented
+	.long opasm_sty_zp_x	// 0x94: STY zp,x
+	.long opasm_sta_zp_x	// 0x95: STA zp,x
+	.long opasm_stx_zp_y	// 0x96: STX zp,y
+	.long 0					// 0x97: SAX zp,y		undocumented
+	.long opasm_tya     	// 0x98: TYA
+	.long opasm_sta_abs_y	// 0x99: STA abs,y
+	.long opasm_txs     	// 0x9A: TXS
+	.long 0					// 0x9B: SHS abs,y		undocumented
+	.long 0					// 0x9C: SHY abs,x		undocumented
+	.long opasm_sta_abs_x	// 0x9D: STA abs,x
+	.long 0					// 0x9E: SHX abs,y		undocumented
+	.long 0					// 0x9F: SHA abs,y		undocumented
+	.long opasm_ldy_imm 	// 0xA0: LDY imm
+	.long opasm_lda_indzx   // 0xA1: LDA (,x)
+	.long opasm_ldx_imm 	// 0xA2: LDX imm
+	.long 0   				// 0xA3: LAX (,y)		undocumented
+	.long opasm_ldy_zp  	// 0xA4: LDY zp
+	.long opasm_lda_zp  	// 0xA5: LDA zp
+	.long opasm_ldx_zp		// 0xA6: LDX zp
+	.long 0  				// 0xA7: LAX zp			undocumented
+	.long opasm_tay     	// 0xA8: TAY
+	.long opasm_lda_imm 	// 0xA9: LDA imm
+	.long opasm_tax     	// 0xAA: TAX
+	.long 0     			// 0xAB: LAX			undocumented
+	.long opasm_ldy_abs 	// 0xAC: LDY abs
+	.long opasm_lda_abs 	// 0xAD: LDA abs
+	.long opasm_ldx_abs 	// 0xAE: LDX abs
+	.long 0 				// 0xAF: LAX abs
+	.long opasm_bcs     	// 0xB0: BCS
+	.long opasm_lda_y   	// 0xB1: LDA (),y
+	.long opasm_undef
+	.long 0  				// 0xB3: LAX (),y
+	.long opasm_ldy_zp_x	// 0xB4: LDY zp,x
+	.long opasm_lda_zp_x	// 0xB5: LDA zp,x
+	.long opasm_ldx_zp_y	// 0xB6: LDX zp,y
+	.long opasm_lax_zp_y	// 0xB7: LAX zp,y
+	.long opasm_clv     	// 0xB8: CLV
+	.long opasm_lda_abs_y	// 0xB9: LDA abs,y
+	.long opasm_tsx     	// 0xBA: TSX
+	.long 0					// 0xBB: LAS abs,y		undocumented
+	.long opasm_ldy_abs_x	// 0xBC: LDY abs,x
+	.long opasm_lda_abs_x	// 0xBD: LDA abs,x
+	.long opasm_ldx_abs_y	// 0xBE: LDX abs,y
+	.long 0					// 0xBF: LAX abs,y
+	.long opasm_cpy_imm 	// 0xC0: CPY imm
+	.long opasm_cmp_indzx	// 0xC1: CMP (,x)
+	.long opasm_nop_imm 	// 0xC2: NOP imm		undocumented
+	.long 0					// 0xC3: DCP (,x)		undocumented
+	.long opasm_cpy_zp  	// 0xC4: CPY zp
+	.long opasm_cmp_zp		// 0xC5: CMP zp
+	.long opasm_dec_zp  	// 0xC6: DEC zp
+	.long 0  				// 0xC7: DCP zp			undocumented
+	.long opasm_iny     	// 0xC8: INY
+	.long opasm_cmp_imm 	// 0xC9: CMP imm
+	.long opasm_dex     	// 0xCA: DEX
+	.long 0 				// 0xCB: SBX imm		undocumented
+	.long opasm_cpy_abs		// 0xCC: CPY abs
+	.long opasm_cmp_abs		// 0xCD: CMP abs
+	.long opasm_dec_abs		// 0xCE: DEC abs
+	.long 0 				// 0xCF: DCP abs		undocumented
+	.long opasm_bne     	// 0xD0: BNE
+	.long opasm_cmp_indzy	// 0xD1: CMP (),y
+	.long opasm_undef
+	.long 0					// 0xD3: DCP (),y		undocumented
+	.long opasm_nop_zp_x	// 0xD4: NOP zp,x		undocumented
+	.long opasm_cmp_zp_x	// 0xD5: CMP zp,x
+	.long opasm_dec_zp_x	// 0xD6: DEC zp,x
+	.long 0					// 0xD7: DCP zp,x		undocumented
+	.long opasm_cld     	// 0xD8: CLD
+	.long opasm_cmp_abs_y	// 0xD9: CMP abs,y
+	.long opasm_nop     	// 0xDA: NOP			undocumented
+	.long 0					// 0xDB: DCP abs,y		undocumented
+	.long opasm_nop_abs_x	// 0xDC: NOP abs,x		undocumented
+	.long opasm_cmp_abs_x	// 0xDD: CMP abs,x
+	.long opasm_dec_abs_x	// 0xDE: DEC abs,x
+	.long 0					// 0xDF: DCP abs,x		undocumented
+	.long opasm_cpx_imm 	// 0xE0: CPX imm
+	.long opasm_sbc_indzx	// 0xE1: SBC (,x)
+	.long opasm_nop_imm 	// 0xE2: NOP imm		undocumented
+	.long 0					// 0xE3: ISB (,x)		undocumented
+	.long opasm_cpx_zp  	// 0xE4: CPX zp
+	.long opasm_sbc_zp  	// 0xE5: SBC zp
+	.long opasm_inc_zp  	// 0xE6: INC zp
+	.long 0  				// 0xE7: ISB zp			undocumented
+	.long opasm_inx     	// 0xE8: INX
+	.long opasm_sbc_imm 	// 0xE9: SBC imm
+	.long opasm_nop     	// 0xEA: NOP
+	.long opasm_sbc_imm 	// 0xEB: SBC imm		undocumented
+	.long opasm_cpx_abs		// 0xEC: CPX abs
+	.long opasm_sbc_abs 	// 0xED: SBC abs
+	.long opasm_inc_abs 	// 0xEE: INC abs
+	.long 0 				// 0xEF: ISB abs		undocumented
+	.long opasm_beq    		// 0xF0: BEQ
+	.long opasm_sbc_indzy	// 0xF1: SBC (),y
+	.long opasm_undef
+	.long 0					// 0xF3: ISB (),y		undocumented
+	.long opasm_nop_zp_x 	// 0xF4: NOP zp,x		undocumented
+	.long opasm_sbc_zp_x	// 0xF5: SBC zp,x
+	.long opasm_inc_zp_x	// 0xF6: INC zp,x
+	.long 0					// 0xF7: ISB zp,x		undocumented
+	.long opasm_sed     	// 0xF8: SED
+	.long opasm_sbc_abs_y	// 0xF9: SBC abs,y
+	.long opasm_nop     	// 0xFA: NOP			undocumented
+	.long 0					// 0xFB: ISB abs,y		undocumented
+	.long opasm_nop_abs_x	// 0xFC: NOP abs,x		undocumented
+	.long opasm_sbc_abs_x	// 0xFD: SBC abs,x
+	.long opasm_inc_abs_x	// 0xFE: INC abs,x
+	.long 0					// 0xFF: ISB abs,x		undocumented
 

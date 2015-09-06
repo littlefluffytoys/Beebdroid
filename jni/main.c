@@ -114,7 +114,7 @@ JNIEXPORT void JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcExit(JNI
 
 
 JNIEXPORT void JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInit(JNIEnv * env, jobject  obj,
-		jobject amem, jobject aroms, jbyteArray aaudiobuff, jint firstTime) {
+		jobject amem, jobject aroms, jobject audiobuff, jint firstTime) {
 
 	LOGI("bbcInit");
 	autoboot = 0;
@@ -130,8 +130,8 @@ JNIEXPORT void JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInit(JNI
 	roms = (*env)->GetDirectBufferAddress(env, aroms);
 
 	// Get sound buffer details
-	numSndbufSamples = (*env)->GetArrayLength(env, aaudiobuff);
-	sndbuf = (short*) (*env)->GetByteArrayElements(env, aaudiobuff, 0);
+	numSndbufSamples = (*env)->GetDirectBufferCapacity(env, audiobuff);
+	sndbuf = (short*) (*env)->GetDirectBufferAddress(env, audiobuff);
 
 
 	// First-time init
@@ -253,8 +253,12 @@ JNIEXPORT void JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcDeserial
 }
 
 void givealbuffer(int16_t *buf, int pos, int cb) {
+	//numSndbufSamples = (*env)->GetArrayLength(env, aaudiobuff);
+	// (*env)->ReleaseByteArrayElements(env, aaudiobuff, 0);
+
 	//LOGI("givealbuffer! %02X %02X %02X %02X %02X %02X %02X %02X", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
 	(*env)->CallVoidMethod(env, g_obj, midAudioCallback, pos, cb);
+
 }
 
 

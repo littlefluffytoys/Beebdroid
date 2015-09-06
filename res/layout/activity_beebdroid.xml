@@ -2,7 +2,6 @@
 <LinearLayout 
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:lft="http://schemas.android.com/apk/res/com.littlefluffytoys.beebdroid"
-	xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
 	android:id="@+id/root"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
@@ -62,8 +61,6 @@
 	android:textColor="#ffffffff"
 	android:visibility="gone"
 />
-
-  <com.google.ads.AdView android:id="@+id/adView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1" ads:adUnitId="a14ea4abdce59d1" ads:adSize="BANNER" ads:loadAdOnCreate="true"/>
 
 <ImageView 
 	android:id="@+id/btnSave"

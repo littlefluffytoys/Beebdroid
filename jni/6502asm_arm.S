@@ -94,7 +94,7 @@ exec6502:
 
     @loop
 loop:
-	//LOG_CPU
+	// LOG_CPU
 
 	@ Trigger spotting... log PCs (NB: ALWAYS REMOVE FROM RELEASE CODE! ITS ONLY FOR FINDING GOOD PLACES FOR TRIGGERS)
 	//mov %r0, %r4

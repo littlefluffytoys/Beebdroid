@@ -63,18 +63,7 @@
 	add %esp,4
 	popa
 .endm
-.macro LOG_WRITEBYTE val8, addr16
-    pusha
-    mov %edx,0
-    mov %dx, \addr16
-	push %edx
-	mov %edx,0
-	mov %dl, \val8
-	push %edx
-	call log_write
-	add %esp,8
-	popa
-.endm
+
 
 
 // branch without labels: count number of lines to skip over, add 1, multiply by 4. So to skip 2 lines, "b .+12"
@@ -297,16 +286,17 @@ no_interrupt:
     movzx %ebx,\addr
 	cmp %ebx,0x8000
 	jae 1f
-	LOG_WRITEBYTE \val, %bx
 	movb [%esi + %ebx], \val
 	jmp 2f
 1:
 	C_CALL_PRE
 	movzx %eax,\val
+	pushw 0
 	push %ax
+	pushw 0
 	push %bx
 	call writemem_ex
-	add %esp, 4
+	add %esp, 8
 	C_CALL_POST
 2:
 .endm
@@ -389,7 +379,6 @@ no_interrupt:
 	READWORD %ax    		# register uint16_t addr=readword(temp);
     movzx %bx, %dh
 	add %bx, %ax			# addr += cpu->y;
-	and %bx, 255
 	READBYTE %bx		    # temp = readmem(addr);
 .endm
 
@@ -1583,19 +1572,23 @@ opasm_rts:
     movzx %ebx, byte ptr [%ebp+10]
 	bt %bx,3
 	jc 3f
+	mov %ah, %cl
     bt %bx, 0               # get FLAG_C into x86 carry flag
-    sbb %cl, %al            # x86 SBB  works exact same way as 6502 SBC
+    cmc
+    sbb %cl, %al            # x86 SBB  works similarly to 6502 SBC
+    cmc
 	pushf
-	pop %eax
 	and %bl, 0xBE           # clear C and V
+	xor %ah, %cl
+	bt %ax, 15
+    jnc 2f
+	or %bx, 0x40           # set V
+2:
+	pop %eax
 	bt %ax,0
 	jnc 1f
 	or %bl,1                # set C
 1:
-    bt %ax,11
-    jnc 2f
-	or %bx, 0x40           # set V
-2:
     mov byte ptr [%ebp+10], %bl
 	SETZN %cl				# setzn(cpu->a);
 	jmp 4f

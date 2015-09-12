@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.littlefluffytoys.beebdroid"
+	android:versionCode="17"
+	android:versionName="2.0"
+    >
+
+	<supports-screens
+		android:smallScreens="false"
+		android:normalScreens="true"
+		android:largeScreens="true"
+		android:xlargeScreens="true"
+		android:anyDensity="true"/>
+	 
+	<application 
+		android:label="Beebdroid"
+		android:theme="@style/Theme.AppTheme"
+		android:icon="@drawable/icon"
+        android:name=".App"
+        >
+
+		<activity
+		    android:name=".Beebdroid"
+			android:label="Beebdroid"
+			>
+
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+
+			<intent-filter>
+				<action android:name="com.littlefluffytoys.beebdroid.OPEN_DISK"/>
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<data android:scheme="file" />
+				<data android:mimeType="*/*" />
+				<data android:pathPattern=".*\\.ssd" />
+				<data android:host="*" />
+			</intent-filter>
+
+		</activity>
+		
+		<activity 
+			android:name=".LoadDisk"
+			android:label="Load Disk"
+            android:theme="@style/Theme.DialogTheme"
+            />
+
+		<activity 
+			android:name=".AboutActivity"
+			android:label="About" 
+			android:configChanges="orientation" 
+			android:theme="@android:style/Theme.Dialog" />
+
+	</application>
+
+	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="10" />
+
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="com.android.vending.BILLING" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+	<uses-feature android:name="android.hardware.location" android:required="true" /> 
+	<uses-feature android:name="android.hardware.location.network" android:required="false" /> 
+	<uses-feature android:name="android.hardware.location.gps" android:required="false" />
+	<uses-feature android:name="android.hardware.wifi" android:required="false" /> 
+	<uses-feature android:name="android.hardware.telephony" android:required="false" /> 
+
+</manifest> 

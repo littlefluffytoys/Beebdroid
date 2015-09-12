@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.app.FragmentTabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost" 
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout android:orientation="vertical"
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent">
+        <TabWidget android:id="@android:id/tabs"
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content" />
+        <FrameLayout android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent" 
+            android:layout_height="400dp"
+            android:layout_weight="1">
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/nnf_button_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffc0c0c0"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cancel"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Close"
+                android:onClick="onCloseClicked"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v4.app.FragmentTabHost>
+    	

@@ -1,0 +1,373 @@
+[
+    {
+        "k": "acid_drops",
+        "t": "Acid Drops",
+        "pub": "Firebird",
+        "cover": "http://www.stairwaytohell.com/games/f/Firebird-AcidDrops.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Firebird/AcidDrops.zip"
+    },
+    {
+        "k": "arcadians",
+        "t": "Arcadians",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Arcadians.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Arcadians.zip"
+    },
+    {
+        "k": "boffin",
+        "t": "Boffin",
+        "pub": "Addictive",
+        "cover": "http://www.stairwaytohell.com/games/a/Addictive-Boffin.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Addictive/Boffin.zip"
+    },
+    {
+        "k": "castle_quest",
+        "t": "Castle Quest",
+        "pub": "Micro Power",
+        "cover": "http://www.stairwaytohell.com/games/micropower/Micropower-CastleQuest-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Micropower/CastleQuest.zip"
+    },
+    {
+        "k": "chuckie_egg",
+        "t": "Chuckie Egg",
+        "pub": "A & F",
+        "cover": "http://www.stairwaytohell.com/games/a/ANF-ChuckieEgg.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/AnF/ChuckieEgg.zip"
+    },
+    {
+        "k": "citadel",
+        "t": "Citadel",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Citadel.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Citadel.zip"
+    },
+    {
+        "k": "codename_droid",
+        "t": "Codename Droid",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-CodenameDroid.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/CodenameDroid.zip"
+    },
+    {
+        "k": "dare_devil_dennis",
+        "t": "Dare Devil Dennis",
+        "pub": "Visions",
+        "cover": "http://www.stairwaytohell.com/games/v/Visions-DaredevilDenis.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Visions/DareDevilDenis.zip"
+    },
+    {
+        "k": "elite",
+        "t": "Elite",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Elite-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Elite.zip"
+    },
+    {
+        "k": "firetrack",
+        "t": "Firetrack",
+        "pub": "Electric Dreams / Orlando",
+        "cover": "http://www.stairwaytohell.com/games/e/ElectricDreams-Firetrack.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/ElectricDreams/Firetrack.zip"
+    },
+    {
+        "k": "footballmanager",
+        "t": "Football Manager",
+        "pub": "Addictive",
+        "cover": "http://www.stairwaytohell.com/games/a/Addictive-FootballManager.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Addictive/FootballManager.zip"
+    },
+    {
+        "k": "frak",
+        "t": "Frak!",
+        "pub": "Aardvark / Orlando",
+        "cover": "http://www.stairwaytohell.com/games/a/Aardvark-Frak.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Aardvark/Frak.zip"
+    },
+    {
+        "k": "frenzy",
+        "t": "Frenzy",
+        "pub": "Micro Power",
+        "cover": "http://www.stairwaytohell.com/games/micropower/Micropower-Frenzy.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Micropower/Frenzy.zip"
+    },
+    {
+        "k": "galaforce",
+        "t": "Galaforce",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Galaforce.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Galaforce.zip"
+    },
+    {
+        "k": "ghouls",
+        "t": "Ghouls",
+        "pub": "Micro Power",
+        "cover": "http://www.stairwaytohell.com/games/micropower/Micropower-Ghouls.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Micropower/Ghouls.zip"
+    },
+    {
+        "k": "gimpo",
+        "t": "Gimpo",
+        "pub": "A&B Computing / Kenton Price",
+        "cover": "http://www.stairwaytohell.com/beebdroid/kentisoft/gimpo.jpg",
+        "disk": "http://www.stairwaytohell.com/beebdroid/kentisoft/gimpo.zip"
+    },
+    {
+        "k": "the_hobbit",
+        "t": "The Hobbit",
+        "pub": "Melbourne House",
+        "cover": "http://www.stairwaytohell.com/games/m/MelbourneHouse-TheHobbit-v2.0-alt.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/MelbourneHouse/TheHobbit.zip"
+    },
+    {
+        "k": "hopper",
+        "t": "Hopper",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Hopper-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Hopper.zip"
+    },
+    {
+        "k": "hunchback",
+        "t": "Hunchback",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-HunchbackMK2.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Hunchback-Superior.zip"
+    },
+    {
+        "k": "hyper_viper",
+        "t": "Hyper Viper",
+        "pub": "Retro Software / Kenton Price",
+        "cover": "http://www.stairwaytohell.com/beebdroid/kentisoft/hyper_viper.jpg",
+        "disk": "http://www.stairwaytohell.com/beebdroid/kentisoft/hyper_viper.zip"
+    },
+    {
+        "k": "imogen",
+        "t": "Imogen",
+        "pub": "Micro Power",
+        "cover": "http://www.stairwaytohell.com/games/micropower/Micropower-Imogen.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Micropower/Imogen.zip"
+    },
+    {
+        "k": "jcb_digger",
+        "t": "JCB Digger",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-JCBDigger.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/JCBDigger.zip"
+    },
+    {
+        "k": "jet_set_willy",
+        "t": "Jet Set Willy",
+        "pub": "Tynesoft",
+        "cover": "http://www.stairwaytohell.com/games/t/Tynesoft-JetSetWilly.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Tynesoft/JetSetWilly.zip"
+    },
+    {
+        "k": "joust",
+        "t": "Joust",
+        "pub": "Atarisoft",
+        "cover": "http://www.intellivisionworld.com/Archive/ImgSoftware_Box/Atarisoft-Joust.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Atarisoft/Joust.zip"
+    },
+    {
+        "k": "killer_gorilla",
+        "t": "Killer Gorilla",
+        "pub": "Micro Power / Adrian Stephens",
+        "cover": "http://www.stairwaytohell.com/games/micropower/Micropower-KillerGorilla-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Micropower/KillerGorilla.zip"
+    },
+    {
+        "k": "labyrinth",
+        "t": "Labyrinth",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Labyrinth.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Labyrinth.zip"
+    },
+    {
+        "k": "lunar_jetman",
+        "t": "Lunar Jetman",
+        "pub": "Ultimate",
+        "cover": "http://www.trueknowledge.com/images/thumbs/180/250/4beca01c4b1fb472ef67873184b2f339",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Ultimate/LunarJetman.zip"
+    },
+    {
+        "k": "magic_mushrooms",
+        "t": "Magic Mushrooms",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-MagicMushrooms.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/MagicMushrooms.zip"
+    },
+    {
+        "k": "manic_miner",
+        "t": "Manic Miner",
+        "pub": "Software Projects",
+        "cover": "http://www.stairwaytohell.com/games/s/SoftwareProjects-ManicMiner.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/SoftwareProjects/ManicMiner.zip"
+    },
+    {
+        "k": "meteors",
+        "t": "Meteors",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Meteors-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Meteors.zip"
+    },
+    {
+        "k": "microbe",
+        "t": "Microbe",
+        "pub": "Virgin",
+        "cover": "http://www.stairwaytohell.com/games/v/Virgin-Microbe.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Virgin/Microbe.zip"
+    },
+    {
+        "k": "monsters",
+        "t": "Monsters",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Monsters.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Monsters.zip"
+    },
+    {
+        "k": "mr_ee",
+        "t": "Mr Ee",
+        "pub": "Micro Power / Adrian Stephens",
+        "cover": "http://www.stairwaytohell.com/games/micropower/Micropower-MrEe-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Micropower/MrEe.zip"
+    },
+    {
+        "k": "pengi",
+        "t": "Pengi",
+        "pub": "Visons",
+        "cover": "http://www.stairwaytohell.com/games/v/Visions-Pengi.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Visions/Pengi.zip"
+    },
+    {
+        "k": "percy_penguin",
+        "t": "Percy Penguin",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-PercyPenguin.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/PercyPenguin.zip"
+    },
+    {
+        "k": "planetoid",
+        "t": "Planetoid",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Planetoid-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Planetoid.zip"
+    },
+    {
+        "k": "psycastria",
+        "t": "Psycastria",
+        "pub": "Audiogenic",
+        "cover": "http://www.stairwaytohell.com/games/a/Audiogenic-Psycastria.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Audiogenic/Psycastria.zip"
+    },
+    {
+        "k": "ravenskull",
+        "t": "Ravenskull",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Ravenskull-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Ravenskull.zip"
+    },
+    {
+        "k": "repton1",
+        "t": "Repton",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Repton.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Repton.zip"
+    },
+    {
+        "k": "repton2",
+        "t": "Repton 2",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Repton2.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Repton2.zip"
+    },
+    {
+        "k": "repton3",
+        "t": "Repton 3",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Repton3.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Repton3.zip"
+    },
+    {
+        "k": "repton_infinity",
+        "t": "Repton Infinity",
+        "pub": "Superior Software",
+        "cover": "http://www.retroalphabet.com/covers/repton_infinity.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/ReptonInfinity.zip"
+    },
+    {
+        "k": "repton_thru_time",
+        "t": "Repton Thru Time",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-ReptonThruTime-bbcelk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/ReptonThruTime.zip"
+    },
+    {
+        "k": "ripton",
+        "t": "Ripton",
+        "pub": "A&B Computing / Kenton Price",
+        "cover": "http://www.stairwaytohell.com/beebdroid/kentisoft/ripton.jpg",
+        "disk": "http://www.stairwaytohell.com/beebdroid/kentisoft/ripton.zip"
+    },
+    {
+        "k": "rocket_raid",
+        "t": "Rocket Raid",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-RocketRaid-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/RocketRaid.zip"
+    },
+    {
+        "k": "snapper",
+        "t": "Snapper",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-Snapper-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/Snapper-v1.zip"
+    },
+    {
+        "k": "starquake",
+        "t": "Starquake",
+        "pub": "Bubble Bus / Kenton Price",
+        "cover": "http://www.stairwaytohell.com/games/b/BubbleBus-Starquake.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Bubblebus/Starquake.zip"
+    },
+    {
+        "k": "strykers_run",
+        "t": "Stryker's Run",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-StrykersRun-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/StrykersRun.zip"
+    },
+    {
+        "k": "super_invaders",
+        "t": "Super Invaders",
+        "pub": "Acornsoft",
+        "cover": "http://www.stairwaytohell.com/games/acornsoft/Acornsoft-SuperInvaders-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Acornsoft/SuperInvaders.zip"
+    },
+    {
+        "k": "thrust",
+        "t": "Thrust",
+        "pub": "Superior Software",
+        "cover": "http://www.stairwaytohell.com/games/superior/Superior-Thrust-S.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Superior/Thrust.zip"
+    },
+    {
+        "k": "twin_kingdom_valley",
+        "t": "Twin Kingdom Valley",
+        "pub": "Bug Byte",
+        "cover": "http://www.stairwaytohell.com/games/b/BugByte-TwinKingdomValley.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/BugByte/TwinKingdomValley.zip"
+    },
+    {
+        "k": "yie_ar_kung_fu",
+        "t": "Yie Ar Kung Fu",
+        "pub": "Imagine",
+        "cover": "http://www.stairwaytohell.com/games/i/Imagine-YieArKungFu-disk.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Imagine/YieArKungFu.zip"
+    },
+    {
+        "k": "zalaga",
+        "t": "Zalaga",
+        "pub": "Aardvark / Orlando",
+        "cover": "http://www.stairwaytohell.com/games/a/Aardvark-Zalaga.jpg",
+        "disk": "http://www.stairwaytohell.com/bbc/archive/diskimages/Aardvark/Zalaga.zip"
+    }
+]

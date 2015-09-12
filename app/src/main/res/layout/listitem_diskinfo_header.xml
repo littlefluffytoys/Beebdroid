@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="40dp"
+	android:paddingLeft="8dp"
+	android:paddingRight="8dp"
+	android:paddingTop="4dp"
+	android:paddingBottom="4dp"
+	android:background="#ffc0e0e0"
+	>
+
+<TextView
+	android:id="@+id/title"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_toRightOf="@id/image"
+	android:textColor="@android:color/black"
+	android:textSize="16sp"
+	/>
+
+
+</RelativeLayout>

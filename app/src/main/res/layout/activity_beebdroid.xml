@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:lft="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/root"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	>
+	<LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:background="@color/background_material_dark"
+        android:orientation="horizontal"
+        android:gravity="right"
+        >
+        <ImageView
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="center"
+            android:layout_marginRight="8dp"
+            android:scaleType="centerInside"
+            android:background="@drawable/button_bg"
+            android:src="@drawable/save"
+            android:clickable="true"
+            android:onClick="onOpenClicked"
+            />
+    </LinearLayout>
+
+
+<view class="com.littlefluffytoys.beebdroid.Beebdroid$BeebView"
+	android:id="@+id/beeb"
+	android:layout_width="fill_parent"
+	android:layout_height="0dp"
+	android:layout_weight="272"
+	/>
+
+<RelativeLayout 	
+	android:layout_width="fill_parent"
+	android:layout_height="0dp"
+	android:layout_weight="168"
+	android:background="#ff000000"
+	android:paddingTop="10dp"
+>
+
+<view class="com.littlefluffytoys.beebdroid.Keyboard"
+	android:id="@+id/keyboard"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	/>
+
+<view class="com.littlefluffytoys.beebdroid.ControllerView"
+	android:id="@+id/controller"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	/>
+
+</RelativeLayout>
+
+
+
+</LinearLayout>

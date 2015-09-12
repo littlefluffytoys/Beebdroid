@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <style name="Theme.AppTheme" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--item name="actionBarStyle">@style/MyActionBarStyle</item -->
+        <item name="colorPrimary">#404040</item>
+        <item name="colorPrimaryDark">#202020</item>
+    </style>
+    <style name="Theme.DialogTheme" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="windowNoTitle">true</item>
+    </style>
+
+
+    <style name="NNF_BaseTheme" parent="Theme.AppCompat.DialogWhenLarge">
+        <!-- You can override this in your sub theme -->
+        <item name="nnf_toolbarTheme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+
+        <!-- These are important. Handled by toolbar. -->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="NNF_BaseTheme.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <!-- You can override this in your sub theme -->
+        <item name="nnf_toolbarTheme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+
+        <!-- These are important. Handled by toolbar. -->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

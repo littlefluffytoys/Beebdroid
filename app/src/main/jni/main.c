@@ -5,7 +5,8 @@
 */
 
 #include "main.h"
-#include "importgl.h"
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 extern BITMAP* b;
 extern uint8_t crtc[];
@@ -38,13 +39,10 @@ jint JNI_OnLoad(JavaVM *jvm, void *reserved) {
 	gJavaVM = jvm;
 	int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &env, JNI_VERSION_1_4);
 	cls = (*env)->FindClass(env, "com/littlefluffytoys/beebdroid/Beebdroid");
-	LOGI("cls=0x%X", cls);
 	midAudioCallback = (*env)->GetMethodID(env, cls, "audioCallback", "(II)V");
-	LOGI("mid=0x%X", midAudioCallback);
 	midVideoCallback = (*env)->GetMethodID(env, cls, "videoCallback", "()V");
-	LOGI("mid=0x%X", midAudioCallback);
 
-	importGLInit();
+	//importGLInit();
 
 	return JNI_VERSION_1_4;
 
@@ -298,12 +296,6 @@ void set_palette(int* p) {
 }
 
 
-float vertexes[] = {
-		0,0,0,
-		1,0,0,
-		0,1,0,
-		1,1,0
-};
 
 extern int s_firstx, s_lastx, s_firsty, s_lasty;
 
@@ -404,21 +396,88 @@ BITMAP *create_bitmap(int width, int height) {
 	return bmp;
 }
 
+typedef struct _VERTEX {
+    float x;
+    float y;
+    float z;
+    float s;
+    float t;
+} VERTEX;
 
+VERTEX vertexes[4] = {
+        {-1,-1,-1,  0,0.5f},
+        { 1,-1,-1,  1,0.5f},
+        {-1, 1,-1,  0,0},
+        { 1, 1,-1,  1,0}
+};
 
-float textureCoords[] = {
-		0,.5f,
-		1,.5f,
-		0,0,
-		1,0
-};
-short indexes[] = {
-		0,1,2,3
-};
+short indexes[4] = {0,1,2,3};
+
 
 int tex;
 int beebview_width;
 int beebview_height;
+
+static void checkGlError(const char* op) {
+    GLint error;
+    for (error = glGetError(); error; error = glGetError()) {
+        LOGI("after %s() glError (0x%x)\n", op, error);
+    }
+}
+GLuint loadShader(GLenum shaderType, const char* pSource) {
+    GLuint shader = glCreateShader(shaderType);
+    if (shader) {
+        glShaderSource(shader, 1, &pSource, NULL);
+        glCompileShader(shader);
+        GLint compiled = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+        if (!compiled) {
+            GLint infoLen = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+            if (infoLen) {
+                char* buf = (char*) malloc(infoLen);
+                if (buf) {
+                    glGetShaderInfoLog(shader, infoLen, NULL, buf);
+                    LOGE("Could not compile shader %d:\n%s\n",
+                         shaderType, buf);
+                    free(buf);
+                }
+                glDeleteShader(shader);
+                shader = 0;
+            }
+        }
+    }
+    return shader;
+}
+
+GLuint vertexBufferId;
+GLuint indexBufferId;
+GLuint gProgram;
+GLuint gvPositionHandle;
+GLuint gvTexCoord;
+
+#define ATTRIB_VERTEX 1
+#define ATTRIB_TEXCOORD 2
+
+static const char gVertexShader[] =
+        "attribute vec4 vPosition;\n"
+        "attribute vec2 texcoord;\n"
+        "varying mediump vec2 v_texcoord;\n"
+                "void main() {\n"
+                "  gl_Position = vPosition;\n"
+                "  v_texcoord = texcoord;\n"
+                "}\n";
+
+
+static const char* gFragmentShader = "\
+    varying mediump vec2 v_texcoord;\n\
+    uniform sampler2D texture;\n\
+    \n\
+    void main()\n\
+    {\n\
+    gl_FragColor = texture2D(texture, v_texcoord);\n\
+    }\n\
+    ";
 
 //
 // bbcInitGl
@@ -428,13 +487,55 @@ JNIEXPORT jint JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInitGl(J
 	beebview_width = width;
 	beebview_height = height;
 
- 	// Enable texture unit
- 	glEnable(GL_TEXTURE_2D);
- 	glEnableClientState(GL_VERTEX_ARRAY);
- 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    GLuint vertexShader = loadShader(GL_VERTEX_SHADER, gVertexShader);
+    if (!vertexShader) {
+        return 0;
+    }
 
- 	glEnable(GL_BLEND);
- 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GLuint pixelShader = loadShader(GL_FRAGMENT_SHADER, gFragmentShader);
+    if (!pixelShader) {
+        return 0;
+    }
+
+    gProgram = glCreateProgram();
+    glAttachShader(gProgram, vertexShader);
+    checkGlError("glAttachShader");
+    glAttachShader(gProgram, pixelShader);
+    checkGlError("glAttachShader");
+
+    glBindAttribLocation(gProgram, ATTRIB_VERTEX, "vPosition");
+    glBindAttribLocation(gProgram, ATTRIB_TEXCOORD, "texcoord");
+
+    glLinkProgram(gProgram);
+    GLint linkStatus = GL_FALSE;
+    glGetProgramiv(gProgram, GL_LINK_STATUS, &linkStatus);
+    if (linkStatus != GL_TRUE) {
+        GLint bufLength = 0;
+        glGetProgramiv(gProgram, GL_INFO_LOG_LENGTH, &bufLength);
+        if (bufLength) {
+            char* buf = (char*) malloc(bufLength);
+            if (buf) {
+                glGetProgramInfoLog(gProgram, bufLength, NULL, buf);
+                LOGE("Could not link program:\n%s\n", buf);
+                free(buf);
+            }
+        }
+        glDeleteProgram(gProgram);
+        gProgram = 0;
+    }
+
+    if (!gProgram) {
+        LOGE("Could not create program.");
+        return 0;
+    }
+    gvPositionHandle = glGetAttribLocation(gProgram, "vPosition");
+    checkGlError("glGetAttribLocation");
+    gvTexCoord = glGetAttribLocation(gProgram, "texcoord");
+    checkGlError("glGetAttribLocation");
+
+ 	glEnable(GL_TEXTURE_2D);
+    glGenBuffers(1, &vertexBufferId);
+    glGenBuffers(1, &indexBufferId);
 
  	// Get a texture ID
 	int textures[] = {1};
@@ -445,8 +546,8 @@ JNIEXPORT jint JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInitGl(J
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// Assign the bitmap pixels to the texture
 	glTexImage2D(GL_TEXTURE_2D,
@@ -458,6 +559,7 @@ JNIEXPORT jint JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInitGl(J
 		GL_RGB,
 		GL_UNSIGNED_SHORT_5_6_5,
 		b->pixels);
+
 }
 
 
@@ -465,35 +567,36 @@ JNIEXPORT jint JNICALL Java_com_littlefluffytoys_beebdroid_Beebdroid_bbcInitGl(J
 void blit_to_screen(int source_x, int source_y, int width, int height)
 {
 	glViewport(0, 0, beebview_width, beebview_height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrthof(0, 1, 0, 1, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
 
     glBindTexture(GL_TEXTURE_2D, tex);
 
     //LOGI("blit_to_screen source_y=%d, height=%d", source_y, height);
-    textureCoords[0] = textureCoords[4] = (float)source_x / (float)1024.0f;
-    textureCoords[2] = textureCoords[6] = (float)(source_x+width) / (float)1024.0f;
-    textureCoords[5] = textureCoords[7] = (float)source_y / (float)512.0f;
-    textureCoords[1] = textureCoords[3] = (float)(source_y+height) / (float)512.0f;
+    vertexes[0].s = vertexes[2].s = (float)source_x / (float)1024.0f;
+    vertexes[1].s = vertexes[3].s = (float)(source_x+width) / (float)1024.0f;
+    vertexes[2].t = vertexes[3].t = (float)source_y / (float)512.0f;
+    vertexes[0].t = vertexes[1].t = (float)(source_y+height) / (float)512.0f;
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes), vertexes, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
+
 
     // Update the texture with the updated bitmap pixels
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0,
             	             1024,320, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, b->pixels);
-    /*glTexImage2D(GL_TEXTURE_2D,
-    		0,
-    		GL_RGB,
-    		1024,
-    		512,
-    		0,
-    		GL_RGB,
-    		GL_UNSIGNED_SHORT_5_6_5,
-    		b->pixels);
-*/
-	glVertexPointer(3, GL_FLOAT, 0, vertexes);
-	glTexCoordPointer(2, GL_FLOAT, 0, textureCoords);
-	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, indexes);
+
+
+    glUseProgram(gProgram);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
+
+    glVertexAttribPointer(gvPositionHandle, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), 0);
+    glEnableVertexAttribArray(gvPositionHandle);
+    glVertexAttribPointer(gvTexCoord, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(gvTexCoord);
+    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
 
 	// Swap buffers on the java side (also updates FPS display)
 	(*env)->CallVoidMethod(env, g_obj, midVideoCallback);

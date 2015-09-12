@@ -26,9 +26,9 @@ LOCAL_SRC_FILES += \
     ssd.c \
     sysvia.c \
     uservia.c \
-    video.c \
-    importgl.c
-    
-LOCAL_LDLIBS += -lm -llog -ljnigraphics -lz -lGLESv1_CM
+    video.c
+
+
+LOCAL_LDLIBS += -lm -llog -ljnigraphics -lz -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)

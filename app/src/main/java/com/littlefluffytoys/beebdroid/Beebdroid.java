@@ -285,9 +285,9 @@ public class Beebdroid extends Activity
 	        model.loadRoms(this, Model.SupportedModels[1]);
 	        bbcInit(model.mem, model.roms, audiobuff, 1);
 	        currentController = Controllers.DEFAULT_CONTROLLER;
-			if (UserPrefs.shouldShowSplashScreen(this)) {
-				startActivity(new Intent(Beebdroid.this, AboutActivity.class));
-			}  
+			//if (UserPrefs.shouldShowSplashScreen(this)) {
+			//	startActivity(new Intent(Beebdroid.this, AboutActivity.class));
+			//}
 			processDiskViaIntent();
 		}    	
         else {
@@ -680,6 +680,8 @@ public class Beebdroid extends Activity
 	    	Log.d(TAG, "beebView is " + rcDst.width() + "x" + rcDst.height());
 	    }
 
+		private static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 			Log.d(TAG, "surfaceCreated");
@@ -690,28 +692,12 @@ public class Beebdroid extends Activity
 	        if(!egl.eglInitialize(display, version)) {
 	        	throw new RuntimeException("eglInitialize failed");
 		    }
-	        /*
-	        int[] attrib_list = new int[] {
-	        		EGL10.EGL_RED_SIZE, 5,
-	        		EGL10.EGL_GREEN_SIZE, 6,
-	        		EGL10.EGL_BLUE_SIZE, 5,
-	        		EGL10.EGL_ALPHA_SIZE, 0,
-	        		EGL10.EGL_DEPTH_SIZE, 0,
-	        		EGL10.EGL_NONE
-	        };
-	        egl.eglGetConfigs(display, configs, config_size, num_config)
-	        EGLConfig[] configs = new EGLConfig[1];
-	        int[] numConfigs = new int[] {1};
-	        egl.eglChooseConfig(display, attrib_list, configs, configs.length, numConfigs);
-	        if (0 == numConfigs[0]) {
-	        	throw new RuntimeException("No matching EGL config");
-	        }
-	        config = configs[0];
-	         */
-	        
+
+			int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE };
+
 	        config = getEglConfig565(egl, display);
 
-	        ctxt = egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, null);
+			ctxt = egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, attrib_list);
 
 	        
 		}
